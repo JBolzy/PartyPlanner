@@ -194,3 +194,10 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 
 
 .add-btn { width: 100%; font: inherit; font-weight: 700; color: var(--pine-dark); background: transparent; border: 2px dashed #bfae82; border-radius: 12px; padding: .75rem; cursor: pointer; }
 .add-btn:hover { background: #f6ecd0; border-color: var(--gold); }
+
+/* ---- RSVP: adults / kids with a live total ---- */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; align-items: end; }
+.pair label { min-width: 0; }
+.total { margin: 0; color: var(--muted); font-size: .95rem; }
+.total strong { color: var(--pine-dark); }
+.count small { display: block; text-align: right; font-weight: 400; font-size: .8rem; }

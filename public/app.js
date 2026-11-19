@@ -46,6 +46,14 @@
   // Entries made before dishes were linked to guests only have a typed name.
   const bringerOf = (f) => (state.person.find((p) => p.id === f.personId) || {}).name || f.bringerName || 'someone';
 
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  // "2 adults · 1 kid". RSVPs made before adults/kids were asked only have a total.
+  function groupLabel(p) {
+    if (p.partySize <= 1) return '';
+    if (p.adults == null) return `party of ${p.partySize}`;
+    return p.kids ? `${plural(p.adults, 'adult', 'adults')} · ${plural(p.kids, 'kid', 'kids')}` : plural(p.adults, 'adult', 'adults');
+  }
+
   function setMe(id) {
     me = id;
     if (id) localStorage.setItem(ME_KEY, id);
@@ -81,7 +89,11 @@
     const list = $('guest-list');
     list.replaceChildren();
     const total = state.person.reduce((n, p) => n + p.partySize, 0);
-    $('guest-count').textContent = state.person.length ? `${total} ${total === 1 ? 'person' : 'people'}` : '';
+    const kids = state.person.reduce((n, p) => n + (p.kids || 0), 0);
+    $('guest-count').replaceChildren(...(state.person.length ? [
+      plural(total, 'person', 'people'),
+      el('small', {}, kids ? `${plural(total - kids, 'adult', 'adults')} · ${plural(kids, 'kid', 'kids')}` : plural(total, 'adult', 'adults')),
+    ] : []));
     if (!state.person.length) {
       list.append(el('li', { class: 'empty' }, 'No one yet. Be the first!'));
       return;
@@ -91,7 +103,7 @@
       const text = el('div', {},
         el('span', { class: 'who' }, p.name),
         p.id === me ? el('span', { class: 'you' }, 'you') : '',
-        p.partySize > 1 ? el('span', { class: 'badge' }, `+${p.partySize - 1}`) : '',
+        groupLabel(p) ? el('span', { class: 'badge' }, groupLabel(p)) : '',
         p.note ? el('span', { class: 'sub' }, p.note) : '',
         dishes.length ? el('span', { class: 'sub bringing' }, `Bringing: ${dishes.join(', ')}`) : '',
       );
@@ -158,11 +170,21 @@
   const forms = { rsvp: $('rsvp-form'), person: $('guest-form'), food: $('food-form') };
   const showError = (form, msg) => { form.querySelector('.error').textContent = msg; };
 
+  // "Total: 3 people" = adults + kids, kept live as you type.
+  function syncTotal(form) {
+    const n = (Number(form.elements.adults.value) || 0) + (Number(form.elements.kids.value) || 0);
+    form.querySelector('[data-total] strong').textContent = plural(n, 'person', 'people');
+  }
+  for (const form of [forms.rsvp, forms.person]) form.addEventListener('input', () => syncTotal(form));
+  const resetRsvp = () => { forms.rsvp.reset(); syncTotal(forms.rsvp); };
+
   function startEditPerson() {
     const mine = meGuest();
     const form = forms.person;
     form.elements.name.value = mine.name;
-    form.elements.partySize.value = mine.partySize;
+    form.elements.adults.value = mine.adults ?? mine.partySize; // older RSVPs only have a total
+    form.elements.kids.value = mine.kids ?? 0;
+    syncTotal(form);
     form.elements.note.value = mine.note || '';
     showError(form, '');
     editing.person = true;
@@ -235,16 +257,16 @@
   onSubmit(forms.rsvp, async (body) => {
     // Typing a name that is already on the list signs you in as that person instead of making a duplicate.
     const existing = state.person.find((p) => norm(p.name) === norm(body.name));
-    if (existing) { forms.rsvp.reset(); return setMe(existing.id); }
+    if (existing) { resetRsvp(); return setMe(existing.id); }
     try {
       const created = await api('POST', 'person', body);
       state.person.push(created);
-      forms.rsvp.reset();
+      resetRsvp();
       setMe(created.id);
     } catch (err) {
       if (err.status === 409 && err.data.existingId) {
         await load(); // someone else just added the same name; sign in as them
-        forms.rsvp.reset();
+        resetRsvp();
         return setMe(err.data.existingId);
       }
       throw err;

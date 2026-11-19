@@ -82,7 +82,11 @@
         <h3>First time here? RSVP</h3>
         <p class="hint tight">Let us know if you think you'll make it. It just helps us order enough pizza. No pressure either way.</p>
         <label>Your name <input name="name" maxlength="60" required placeholder="First and last name"></label>
-        <label>How many in your group, including you? <input name="partySize" type="number" min="1" max="20" value="1" required></label>
+        <div class="pair">
+          <label><span>Adults <span class="opt">(including you)</span></span> <input name="adults" type="number" inputmode="numeric" min="1" max="20" value="1" required></label>
+          <label>Kids <input name="kids" type="number" inputmode="numeric" min="0" max="20" value="0" required></label>
+        </div>
+        <p class="total" data-total>Total: <strong>1 person</strong></p>
         <p class="error" role="alert"></p>
         <div class="actions"><button type="submit" class="primary">RSVP</button></div>
       </form>
@@ -104,7 +108,11 @@
         <form id="guest-form" class="form" autocomplete="off" hidden>
           <h3>Edit your RSVP</h3>
           <label>Your name <input name="name" maxlength="60" required></label>
-          <label>How many in your group, including you? <input name="partySize" type="number" min="1" max="20" required></label>
+          <div class="pair">
+          <label><span>Adults <span class="opt">(including you)</span></span> <input name="adults" type="number" inputmode="numeric" min="1" max="20" value="1" required></label>
+          <label>Kids <input name="kids" type="number" inputmode="numeric" min="0" max="20" value="0" required></label>
+        </div>
+        <p class="total" data-total>Total: <strong>1 person</strong></p>
           <label>Note <span class="opt">(optional)</span> <input name="note" maxlength="200" placeholder="Allergies, arriving late, etc."></label>
           <p class="error" role="alert"></p>
           <div class="actions">

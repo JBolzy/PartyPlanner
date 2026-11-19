@@ -54,6 +54,16 @@ test('RSVP creates a guest anyone can see; nothing secret is exposed', async () 
   assert.equal(list[0].editTokenHash, undefined);
 });
 
+test('an RSVP stores adults, kids and the summed total', async () => {
+  const { call } = setup();
+  const r = await call('POST', '/api/person', { name: 'Sue', adults: 2, kids: 3 });
+  assert.equal(r.status, 201);
+  assert.deepEqual([r.json.adults, r.json.kids, r.json.partySize], [2, 3, 5]);
+  const edited = await call('PUT', `/api/person/${r.json.id}`, { name: 'Sue', adults: 2, kids: 0 }, r.json.id);
+  assert.deepEqual([edited.json.adults, edited.json.kids, edited.json.partySize], [2, 0, 2]);
+  assert.equal((await call('GET', '/api/person')).json[0].partySize, 2);
+});
+
 test('invalid body -> 400', async () => {
   const { call, rsvp } = setup();
   const sue = await rsvp('Sue');

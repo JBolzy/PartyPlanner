@@ -52,6 +52,17 @@ test('each countdown unit puts only the number in the card, with the label outsi
   }
 });
 
+test('both RSVP forms ask for adults and kids (no single party-size box) and show a total', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+  for (const id of ['rsvp-form', 'guest-form']) {
+    const form = html.slice(html.indexOf(`id="${id}"`), html.indexOf('</form>', html.indexOf(`id="${id}"`)));
+    assert.match(form, /name="adults"/, `${id} adults`);
+    assert.match(form, /name="kids"/, `${id} kids`);
+    assert.match(form, /data-total/, `${id} total`);
+    assert.doesNotMatch(form, /name="partySize"/, `${id} no partySize`);
+  }
+});
+
 test('add-a-dish form starts collapsed behind a button', () => {
   const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
   assert.match(html, /<button[^>]*id="add-dish-btn"/);
