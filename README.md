@@ -26,3 +26,7 @@ Read it at `/api/stats` (while signed in to the site password): total opens, uni
 The footer shows a fine-print counter ("Opened 42 times"), fed by `GET /api/visit`, which returns only `{ "opens": N }` (page opens; "That's me" taps are not counted).
 
 In the `visit` collection, filter on `kind`: `open` is a page open, `signin` is someone identifying themselves. Sign-ins also carry `via`: `pick` for a "That's me" tap, `rsvp` for a new RSVP (or typing a name already on the list). Both count toward a guest's sign-in total in `/api/stats`.
+
+## Keeping your own visits out of the numbers
+- **Per browser (recommended):** open `/api/notrack` once in each browser you use (laptop, phone). The server sets a long-lived cookie and ignores that browser's visits from then on; the footer counter still shows for you. `/api/notrack?off=1` turns counting back on. Because the cookie is set by the server it survives the browser clearing the page's own storage.
+- **By device id (backup):** set a Netlify environment variable `IGNORE_DEVICES` to a comma-separated list of short (8-character) device ids, e.g. `4c8f5678,9338f5ab`. Any device whose id starts with one of them is never recorded. Entries shorter than 8 characters are ignored so a typo can't hide everybody. Redeploy after changing it.

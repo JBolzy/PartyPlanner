@@ -240,3 +240,93 @@ test('RSVP sign-ins and "That\'s me" taps both count toward a guest\'s sign-in t
   const s = (await call('GET', '/api/stats')).json;
   assert.equal(s.signIns[0].count, 2);
 });
+
+// ---- "don't count me": the owner's own browsers/devices never show up in the numbers
+function rawCall(opts = {}) {
+  const { db, stores } = fakeDb();
+  const handler = createHandler(async () => db, opts);
+  return {
+    stores,
+    call: (method, path, { headers = {}, body, query } = {}) =>
+      handler({ httpMethod: method, path, headers, queryStringParameters: query || null, body: body === undefined ? null : JSON.stringify(body) }),
+  };
+}
+const COUNT_ME = { visitorId: VISITOR };
+
+test('/api/notrack sets a long-lived, server-side cookie and tells you so', async () => {
+  const { call } = rawCall();
+  const r = await call('GET', '/api/notrack');
+  assert.equal(r.statusCode, 200);
+  assert.match(r.headers['content-type'], /text\/html/);
+  const cookie = r.headers['set-cookie'];
+  assert.match(cookie, /^pp_notrack=1;/);
+  assert.match(cookie, /Max-Age=(\d+)/);
+  assert.ok(Number(cookie.match(/Max-Age=(\d+)/)[1]) >= 31536000, 'lasts at least a year');
+  for (const attr of ['HttpOnly', 'Secure', 'SameSite=Lax', 'Path=/']) assert.ok(cookie.includes(attr), attr);
+  assert.match(r.body, /won't be counted/i);
+});
+
+test('/api/notrack?off=1 turns counting back on', async () => {
+  const { call } = rawCall();
+  const r = await call('GET', '/api/notrack', { query: { off: '1' } });
+  assert.match(r.headers['set-cookie'], /^pp_notrack=;.*Max-Age=0/);
+  assert.match(r.body, /counting you again/i);
+});
+
+test('notrack is GET only', async () => {
+  const { call } = rawCall();
+  assert.equal((await call('POST', '/api/notrack', { body: {} })).statusCode, 405);
+});
+
+test('a browser with the cookie is never recorded: not opens, not sign-ins', async () => {
+  const { call, stores } = rawCall();
+  const headers = { cookie: 'theme=dark; pp_notrack=1; nf_jwt=abc' };
+  const open = await call('POST', '/api/visit', { headers, body: COUNT_ME });
+  const signin = await call('POST', '/api/visit', { headers, body: { ...COUNT_ME, kind: 'signin', personId: 'g1', via: 'pick' } });
+  assert.equal(open.statusCode, 200);
+  assert.deepEqual(JSON.parse(open.body), { ok: true, counted: false });
+  assert.deepEqual(JSON.parse(signin.body), { ok: true, counted: false });
+  assert.equal((stores.visit || []).length, 0);
+});
+
+test('without the cookie (or with it switched off) visits are recorded as normal', async () => {
+  const { call, stores } = rawCall();
+  assert.equal((await call('POST', '/api/visit', { headers: { cookie: 'theme=dark' }, body: COUNT_ME })).statusCode, 201);
+  assert.equal((await call('POST', '/api/visit', { headers: { cookie: 'pp_notrack=0' }, body: COUNT_ME })).statusCode, 201);
+  assert.equal((await call('POST', '/api/visit', { headers: { cookie: 'xpp_notrack=1' }, body: COUNT_ME })).statusCode, 201, 'a cookie that merely ends the same way does not count');
+  assert.equal(stores.visit.length, 3);
+});
+
+test('a device on the ignore list (by its short 8-character id) is never recorded', async () => {
+  const { call, stores } = rawCall({ ignoreDevices: ['4c8f5678', 'ffffffff'] });
+  const ignored = '4c8f5678-2587-4f6a-bd63-408644728001';
+  const other = '9338f5ab-d25d-491a-8da5-6a2c0650ac9b';
+  assert.deepEqual(JSON.parse((await call('POST', '/api/visit', { body: { visitorId: ignored } })).body), { ok: true, counted: false });
+  assert.equal((await call('POST', '/api/visit', { body: { visitorId: other } })).statusCode, 201);
+  assert.deepEqual(stores.visit.map((v) => v.visitorId), [other]);
+});
+
+test('ignore-list entries shorter than 8 characters are ignored, so a typo cannot hide everyone', async () => {
+  const { call, stores } = rawCall({ ignoreDevices: ['a', '12', '', '   '] });
+  assert.equal((await call('POST', '/api/visit', { body: COUNT_ME })).statusCode, 201);
+  assert.equal(stores.visit.length, 1);
+});
+
+test('the ignore list can come from the IGNORE_DEVICES setting (comma separated, spaces fine)', async () => {
+  const saved = process.env.IGNORE_DEVICES;
+  process.env.IGNORE_DEVICES = ' a1b2c3d4 , 0123abcd ,';
+  try {
+    const { call, stores } = rawCall(); // no explicit option: reads the environment
+    await call('POST', '/api/visit', { body: COUNT_ME }); // VISITOR starts with a1b2c3d4
+    assert.equal((stores.visit || []).length, 0);
+  } finally {
+    if (saved === undefined) delete process.env.IGNORE_DEVICES; else process.env.IGNORE_DEVICES = saved;
+  }
+});
+
+test('someone who is not counted can still see the footer count', async () => {
+  const { call } = rawCall();
+  const r = await call('GET', '/api/visit', { headers: { cookie: 'pp_notrack=1' } });
+  assert.equal(r.statusCode, 200);
+  assert.deepEqual(Object.keys(JSON.parse(r.body)), ['opens']);
+});
