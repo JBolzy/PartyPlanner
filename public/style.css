@@ -70,14 +70,14 @@ h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp
   box-shadow: 0 6px 18px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.3);
 }
 .cd-card::after { /* the fold, drawn over the digits */
-  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-1px);
-  background: rgba(0,0,0,.5); box-shadow: 0 1px 0 rgba(255,255,255,.14); z-index: 2; pointer-events: none;
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  background: rgba(200,206,200,.32); z-index: 2; pointer-events: none;
 }
 .cd-card::before { /* the little hinge notches at each end of the fold */
   content: ""; position: absolute; left: 0; right: 0; top: calc(50% - 5px); height: 10px; z-index: 2; pointer-events: none;
   background:
-    radial-gradient(circle at 0 50%, rgba(0,0,0,.55) 4px, transparent 4.5px) left / 10px 10px no-repeat,
-    radial-gradient(circle at 100% 50%, rgba(0,0,0,.55) 4px, transparent 4.5px) right / 10px 10px no-repeat;
+    radial-gradient(circle at 0 50%, rgba(0,0,0,.3) 3px, transparent 3.5px) left / 8px 10px no-repeat,
+    radial-gradient(circle at 100% 50%, rgba(0,0,0,.3) 3px, transparent 3.5px) right / 8px 10px no-repeat;
 }
 .cd-num {
   position: relative; z-index: 1; display: block;
