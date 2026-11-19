@@ -32,6 +32,28 @@
 
   // "Who are you?" is an honor system: whoever you pick is who the server treats you as.
   let me = localStorage.getItem(ME_KEY) || null;
+  // ---- Anonymous usage counting: one note per page open, and one per tap on "That's me". It sends a random
+  // device id (no name, no IP), and a failure here can never break the page.
+  const VISITOR_KEY = 'partyplanner.visitor.v1';
+  function visitorId() {
+    let id = localStorage.getItem(VISITOR_KEY);
+    if (!id) {
+      id = (crypto.randomUUID && crypto.randomUUID()) || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}-dev`;
+      localStorage.setItem(VISITOR_KEY, id);
+    }
+    return id;
+  }
+  function track(kind, personId) {
+    try {
+      fetch('/api/visit', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...(me ? { 'x-person-id': me } : {}) },
+        body: JSON.stringify({ visitorId: visitorId(), kind, ...(personId ? { personId } : {}) }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch { /* tracking must never break the page */ }
+  }
+
   const state = { person: [], food: [] };
   const editing = { person: false, foodId: null };
   const ui = { foodFormOpen: false }; // the add-a-dish form is collapsed until asked for
@@ -291,7 +313,10 @@
   $('gate-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const id = $('gate-person').value;
-    if (id) setMe(id);
+    if (id) {
+      track('signin', id); // a "That's me" tap
+      setMe(id);
+    }
   });
 
   onSubmit(forms.rsvp, async (body) => {
@@ -355,6 +380,7 @@
     render();
   }
 
+  track('open');
   load().catch(() => { $('loading').textContent = 'Could not load the list. Refresh to retry.'; });
 
   // Pick up other people's changes when someone comes back to the tab.
