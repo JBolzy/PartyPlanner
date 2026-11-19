@@ -23,6 +23,13 @@ test('breakdown rounds partial seconds up so it never shows 0 early', () => {
   assert.deepEqual(breakdown(500), { days: 0, hours: 0, minutes: 0, seconds: 1 });
 });
 
+test('there is no set end time: the party stays "live" all evening and only ends at midnight', () => {
+  assert.equal(new Date(PARTY_END).toISOString(), '2026-12-23T05:00:00.000Z'); // midnight Eastern, end of Dec 22
+  assert.equal(getState(Date.parse('2026-12-22T21:30:00-05:00')), 'live', '9:30 PM');
+  assert.equal(getState(Date.parse('2026-12-22T23:59:00-05:00')), 'live', '11:59 PM');
+  assert.equal(getState(Date.parse('2026-12-23T00:00:00-05:00')), 'after', 'midnight');
+});
+
 test('getState: before, live, after', () => {
   assert.equal(getState(start - 1), 'before');
   assert.equal(getState(start), 'live');

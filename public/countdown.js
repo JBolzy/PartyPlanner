@@ -1,6 +1,8 @@
 // Party time is fixed to Eastern (EST, UTC-5 in December) so every viewer sees the same countdown.
 const PARTY_START = '2026-12-22T13:00:00-05:00';
-const PARTY_END = '2026-12-22T21:00:00-05:00';
+// There is no set end time ("when the last person has left"), so the party counts as live all evening and the
+// thank-you message only takes over at midnight, once the day is over.
+const PARTY_END = '2026-12-23T00:00:00-05:00';
 
 function breakdown(ms) {
   const total = Math.max(0, Math.ceil(ms / 1000));

@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { PARTY_START, PARTY_END } = require('../public/countdown');
+const { PARTY_START } = require('../public/countdown');
 
 const ics = fs.readFileSync(path.join(__dirname, '../public/christmas-party.ics'), 'utf8');
 const toIcsUtc = (iso) => new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
@@ -15,9 +15,15 @@ test('ics is a valid-looking calendar with CRLF line endings', () => {
   assert.match(ics, /BEGIN:VEVENT/);
 });
 
-test('ics start/end match the countdown times', () => {
+test('ics starts exactly when the countdown does, and blocks five hours (1-6 PM) since there is no real end time', () => {
   assert.ok(ics.includes(`DTSTART:${toIcsUtc(PARTY_START)}`), 'DTSTART');
-  assert.ok(ics.includes(`DTEND:${toIcsUtc(PARTY_END)}`), 'DTEND');
+  const blockedUntil = new Date(Date.parse(PARTY_START) + 5 * 60 * 60 * 1000).toISOString();
+  assert.equal(blockedUntil, '2026-12-22T23:00:00.000Z'); // 6:00 PM Eastern
+  assert.ok(ics.includes(`DTEND:${toIcsUtc(blockedUntil)}`), 'DTEND');
+});
+
+test('ics description tells guests there is no set end time', () => {
+  assert.match(ics, /DESCRIPTION:[^\r\n]*no set end time/i);
 });
 
 test('ics has the party name and the address, commas escaped', () => {
