@@ -1,9 +1,9 @@
 (() => {
   const CATEGORIES = [
-    ['side', 'Sides'],
-    ['dessert', 'Desserts'],
-    ['drink', 'Drinks'],
-    ['other', 'Other'],
+    ['side', 'Sides', '🥗'],
+    ['dessert', 'Desserts', '🍰'],
+    ['drink', 'Drinks', '🥤'],
+    ['other', 'Other', '🍽️'],
   ];
   const ME_KEY = 'partyplanner.me.v1';
   const $ = (id) => document.getElementById(id);
@@ -12,6 +12,7 @@
   let me = localStorage.getItem(ME_KEY) || null;
   const state = { person: [], food: [] };
   const editing = { person: false, foodId: null };
+  const ui = { foodFormOpen: false }; // the add-a-dish form is collapsed until asked for
 
   async function api(method, path, body) {
     const res = await fetch(`/api/${path}`, {
@@ -51,6 +52,7 @@
     else localStorage.removeItem(ME_KEY);
     editing.person = false;
     editing.foodId = null;
+    ui.foodFormOpen = false;
     forms.food.reset();
     render();
     window.scrollTo({ top: 0 });
@@ -103,20 +105,28 @@
     $('food-count').textContent =
       state.food.length ? `${state.food.length} ${state.food.length === 1 ? 'dish' : 'dishes'}` : '';
     const known = new Set(CATEGORIES.map(([key]) => key));
-    for (const [key, label] of CATEGORIES) {
+    for (const [key, label, icon] of CATEGORIES) {
       // Entries with a retired category (e.g. an old "main") are shown under Other, not hidden.
       const items = state.food.filter((f) =>
         key === 'other' ? !known.has(f.category) || f.category === 'other' : f.category === key);
       if (!items.length && key === 'other') continue;
-      const cat = el('div', { class: `cat${items.length ? '' : ' empty-cat'}` }, el('h4', {}, label));
-      if (!items.length) cat.append(el('p', { class: 'none' }, 'Nothing yet'));
-      for (const f of items) {
-        cat.append(el('div', { class: 'dish' },
-          el('div', {}, el('span', { class: 'who' }, f.dish), el('span', { class: 'sub' }, `from ${bringerOf(f)}`)),
-          f.personId === me ? actions(() => startEditFood(f.id), () => removeFood(f.id)) : '',
+      const panel = el('section', { class: `cat-panel cat-${key}${items.length ? '' : ' is-empty'}` },
+        el('header', { class: 'cat-head' },
+          el('span', { class: 'cat-icon', 'aria-hidden': 'true' }, icon),
+          el('h4', {}, label),
+          items.length ? el('span', { class: 'cat-count' }, String(items.length)) : el('span', { class: 'cat-none' }, 'Nothing yet'),
         ));
+      if (items.length) {
+        const ul = el('ul', { class: 'dishes' });
+        for (const f of items) {
+          ul.append(el('li', { class: 'dish' },
+            el('div', {}, el('span', { class: 'who' }, f.dish), el('span', { class: 'sub' }, `from ${bringerOf(f)}`)),
+            f.personId === me ? actions(() => startEditFood(f.id), () => removeFood(f.id)) : '',
+          ));
+        }
+        panel.append(ul);
       }
-      root.append(cat);
+      root.append(panel);
     }
   }
 
@@ -135,9 +145,12 @@
 
     $('me-name').textContent = meGuest().name;
     $('guest-form').hidden = !editing.person;
+    const formOpen = ui.foodFormOpen || Boolean(editing.foodId);
+    forms.food.hidden = !formOpen;
+    $('add-dish-btn').hidden = formOpen;
+    $('add-dish-btn').textContent = state.food.some((f) => f.personId === me) ? '+ Add another dish' : '+ Add a dish';
     $('food-form-title').textContent = editing.foodId ? 'Edit your dish' : `Add a dish for ${meGuest().name}`;
     forms.food.querySelector('.primary').textContent = editing.foodId ? 'Save changes' : 'Add dish';
-    forms.food.querySelector('.cancel').hidden = !editing.foodId;
     renderPeople();
     renderFood();
   }
@@ -255,12 +268,21 @@
       state.food.push(await api('POST', 'food', body));
     }
     forms.food.reset();
+    ui.foodFormOpen = false;
     render();
   });
   forms.food.querySelector('.cancel').addEventListener('click', () => {
     editing.foodId = null;
+    ui.foodFormOpen = false;
     forms.food.reset();
+    showError(forms.food, '');
     render();
+  });
+  $('add-dish-btn').addEventListener('click', () => {
+    ui.foodFormOpen = true;
+    render();
+    forms.food.elements.dish.focus();
+    forms.food.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
   $('not-me').addEventListener('click', () => setMe(null));

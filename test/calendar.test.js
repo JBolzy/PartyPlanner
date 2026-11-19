@@ -52,6 +52,12 @@ test('each countdown unit puts only the number in the card, with the label outsi
   }
 });
 
+test('add-a-dish form starts collapsed behind a button', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+  assert.match(html, /<button[^>]*id="add-dish-btn"/);
+  assert.match(html, /<form id="food-form"[^>]*\bhidden\b/);
+});
+
 test('page links to the calendar file with a download attribute', () => {
   const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
   assert.match(html, /<a [^>]*href="christmas-party\.ics"[^>]*download/);

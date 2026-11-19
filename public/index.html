@@ -120,8 +120,9 @@
           <span class="count" id="food-count"></span>
         </div>
         <p class="hint">Pizza is covered! Sign up for a side, dessert or drinks so we don't end up with six bags of chips and no ice.</p>
-        <div id="food-list"></div>
-        <form id="food-form" class="form" autocomplete="off">
+        <div id="food-list" class="cat-grid"></div>
+        <button type="button" class="add-btn" id="add-dish-btn">+ Add a dish</button>
+        <form id="food-form" class="form" autocomplete="off" hidden>
           <h3 id="food-form-title">Add a dish</h3>
           <p class="hint tight">Bringing more than one thing? Just add each dish separately.</p>
           <label>Dish <input name="dish" maxlength="80" required placeholder="Grandma's mac &amp; cheese"></label>
@@ -136,7 +137,7 @@
           <p class="error" role="alert"></p>
           <div class="actions">
             <button type="submit" class="primary">Add dish</button>
-            <button type="button" class="ghost cancel" hidden>Cancel</button>
+            <button type="button" class="ghost cancel">Cancel</button>
           </div>
         </form>
       </section>

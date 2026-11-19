@@ -150,10 +150,6 @@ h3 { font-size: 1rem; margin: 0 0 .5rem; color: var(--pine-dark); }
 .empty { color: var(--muted); font-style: italic; }
 .badge { background: var(--pine); color: #fff; border-radius: 99px; padding: .05rem .6rem; font-size: .8rem; font-weight: 700; margin-left: .4rem; white-space: nowrap; }
 
-.cat { margin: .75rem 0 0; }
-.cat h4 { margin: 0; font-size: .75rem; text-transform: uppercase; letter-spacing: .15em; color: var(--berry); }
-.cat.empty-cat h4 { color: var(--muted); }
-.cat .none { color: var(--muted); font-size: .9rem; font-style: italic; margin: .2rem 0; }
 
 .row-actions { display: flex; gap: .4rem; flex-shrink: 0; }
 .row-actions button { font: inherit; font-size: .8rem; padding: .25rem .6rem; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--pine-dark); cursor: pointer; }
@@ -172,3 +168,29 @@ button.ghost { font: inherit; background: transparent; border: 1px solid var(--l
 .error { color: var(--berry); font-weight: 700; margin: 0; min-height: 0; }
 .error:empty { display: none; }
 footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 1rem 2.5rem; }
+
+/* ---- Food: one tinted panel per category, two columns when there's room ---- */
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: .9rem; margin-bottom: 1rem; }
+.cat-panel {
+  --tint: #eef0e8; --edge: #d5d9c8; --ink: var(--pine-dark);
+  border: 1px solid var(--edge); border-radius: 12px; overflow: hidden; background: #fff; align-self: start;
+}
+.cat-side    { --tint: #e4f0e6; --edge: #b9d4bf; --ink: #1f4d3a; }
+.cat-dessert { --tint: #f9e3e2; --edge: #e9b8b5; --ink: #8c1d17; }
+.cat-drink   { --tint: #e2edf8; --edge: #b4cde5; --ink: #1d4b7a; }
+.cat-other   { --tint: #f6ecd0; --edge: #e2d09a; --ink: #6e5210; }
+.cat-head { display: flex; align-items: center; gap: .5rem; padding: .5rem .85rem; background: var(--tint); }
+.cat-panel:not(.is-empty) .cat-head { border-bottom: 1px solid var(--edge); }
+.cat-icon { font-size: 1.15rem; line-height: 1; }
+.cat-head h4 { margin: 0; flex: 1; font-size: .78rem; text-transform: uppercase; letter-spacing: .14em; color: var(--ink); }
+.cat-count { min-width: 1.5rem; text-align: center; padding: .05rem .5rem; border-radius: 99px; background: var(--ink); color: #fff; font-size: .78rem; font-weight: 800; }
+.cat-none { color: var(--muted); font-size: .85rem; font-style: italic; }
+.cat-panel.is-empty { border-style: dashed; background: transparent; }
+.dishes { list-style: none; margin: 0; padding: 0; }
+/* Compact rows: "Taco salad  from Jacob" on one line; it only wraps when a name is long. */
+.cat-panel .dish { padding: .4rem .85rem; }
+.cat-panel .dish .sub { display: inline-block; margin-left: .45rem; font-size: .85rem; }
+.cat-panel .row-actions button { padding: .2rem .5rem; }
+
+.add-btn { width: 100%; font: inherit; font-weight: 700; color: var(--pine-dark); background: transparent; border: 2px dashed #bfae82; border-radius: 12px; padding: .75rem; cursor: pointer; }
+.add-btn:hover { background: #f6ecd0; border-color: var(--gold); }
