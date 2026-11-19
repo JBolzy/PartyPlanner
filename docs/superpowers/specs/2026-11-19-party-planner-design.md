@@ -13,7 +13,7 @@
 ## Design
 - Static HTML/CSS/vanilla JS page: party details (placeholders for date/time/address), **Who's coming** list, **What we're bringing** list, add forms.
 - `person`: name, partySize, note. `food`: dish, personId (references a `person`; chosen from a dropdown of guests, one person can have many dishes; removing a guest removes their dishes), category (side/dessert/drink/other; host provides pizza as the main, so no "main" category).
-- No logins. Anyone with the link can add. Edit/delete only for entries created from the same browser (random edit token stored in localStorage, hashed/compared server-side).
+- Unofficial sign-in (honor system, device-independent): on load the visitor picks their name from the guest dropdown or RSVPs (name + group size; a name already on the list signs you in as that guest). Everyone sees all lists. The client sends the chosen guest id as `x-person-id`; the API lets a guest add/edit/remove only their own RSVP and dishes (401 if nobody picked, 403 if it's not theirs). The site itself is expected to sit behind a Netlify site password.
 - Netlify Functions (Node, `mongodb` driver) read `MONGODB_URI` from env; DB user `partyplanner-app` has readWrite on `partyplanner` only.
 - Basic validation and length limits server-side.
 

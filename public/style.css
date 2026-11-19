@@ -91,6 +91,14 @@ h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp
 .hint { margin: 0 0 1rem; color: var(--muted); font-size: .95rem; }
 .hint.tight { margin: -.35rem 0 0; font-size: .85rem; }
 .bringing { color: var(--pine); font-size: .9rem; }
+
+[hidden] { display: none !important; }
+#app { display: grid; gap: 1.5rem; }
+.center { text-align: center; }
+.me-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 1rem; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); }
+.link { font: inherit; font-weight: 700; color: var(--berry); background: none; border: 0; padding: .2rem .4rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.you { background: var(--gold); color: var(--pine-dark); border-radius: 99px; padding: .05rem .55rem; font-size: .75rem; font-weight: 800; margin-left: .4rem; }
+#gate .form + .form { margin-top: 1.25rem; }
 .details a:hover { color: var(--gold); }
 @media (min-width: 40rem) { .details { grid-template-columns: 1fr 1.4fr; } }
 

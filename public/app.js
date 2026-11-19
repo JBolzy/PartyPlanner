@@ -5,22 +5,27 @@
     ['drink', 'Drinks'],
     ['other', 'Other'],
   ];
-  const TOKEN_KEY = 'partyplanner.tokens.v1';
-  const tokens = JSON.parse(localStorage.getItem(TOKEN_KEY) || '{}'); // { "person:<id>": token }
-  const saveTokens = () => localStorage.setItem(TOKEN_KEY, JSON.stringify(tokens));
-  const mine = (kind, id) => Boolean(tokens[`${kind}:${id}`]);
+  const ME_KEY = 'partyplanner.me.v1';
+  const $ = (id) => document.getElementById(id);
 
+  // "Who are you?" is an honor system: whoever you pick is who the server treats you as.
+  let me = localStorage.getItem(ME_KEY) || null;
   const state = { person: [], food: [] };
-  const editing = { person: null, food: null };
+  const editing = { person: false, foodId: null };
 
-  async function api(method, path, body, token) {
+  async function api(method, path, body) {
     const res = await fetch(`/api/${path}`, {
       method,
-      headers: { 'content-type': 'application/json', ...(token ? { 'x-edit-token': token } : {}) },
+      headers: { 'content-type': 'application/json', ...(me ? { 'x-person-id': me } : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Something went wrong. Try again.');
+    if (!res.ok) {
+      const err = new Error(data.error || 'Something went wrong. Try again.');
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
     return data;
   }
 
@@ -35,45 +40,46 @@
     return n; // all text goes through append() => rendered as text, never HTML
   };
 
-  function rowActions(kind, id) {
-    if (!mine(kind, id)) return '';
+  const meGuest = () => state.person.find((p) => p.id === me) || null;
+  const norm = (s) => s.trim().toLowerCase();
+  // Entries made before dishes were linked to guests only have a typed name.
+  const bringerOf = (f) => (state.person.find((p) => p.id === f.personId) || {}).name || f.bringerName || 'someone';
+
+  function setMe(id) {
+    me = id;
+    if (id) localStorage.setItem(ME_KEY, id);
+    else localStorage.removeItem(ME_KEY);
+    editing.person = false;
+    editing.foodId = null;
+    forms.food.reset();
+    render();
+    window.scrollTo({ top: 0 });
+  }
+
+  function actions(onEdit, onRemove) {
     return el('div', { class: 'row-actions' },
-      el('button', { type: 'button', onclick: () => startEdit(kind, id) }, 'Edit'),
-      el('button', { type: 'button', class: 'del', onclick: () => remove(kind, id) }, 'Remove'),
+      el('button', { type: 'button', onclick: onEdit }, 'Edit'),
+      el('button', { type: 'button', class: 'del', onclick: onRemove }, 'Remove'),
     );
   }
 
-  // Who a dish belongs to is looked up live from the guest list. Entries made before dishes were
-  // linked to people only have a typed name, so fall back to that.
-  const bringerOf = (f) => personName(f.personId) || f.bringerName || 'someone';
-  function personName(id) {
-    const p = state.person.find((x) => x.id === id);
-    return p && p.name;
-  }
-
-  function populatePeopleSelect() {
-    const sel = document.getElementById('food-person');
-    const previous = sel.value;
+  function renderGate() {
+    const sel = $('gate-person');
     sel.replaceChildren();
     if (!state.person.length) {
-      sel.append(el('option', { value: '', disabled: '' }, 'No one yet. Add yourself above first'));
-      sel.value = '';
+      sel.append(el('option', { value: '', disabled: '' }, 'No one yet. RSVP below'));
       return;
     }
-    sel.append(el('option', { value: '', disabled: '' }, 'Choose your name…'));
+    sel.append(el('option', { value: '', disabled: '', selected: '' }, 'Choose your name…'));
     for (const p of state.person) sel.append(el('option', { value: p.id }, p.name));
-    // Default to the most recent guest added from this device (the list is oldest-first).
-    const latestMine = [...state.person].reverse().find((p) => mine('person', p.id));
-    const stillThere = state.person.some((p) => p.id === previous);
-    sel.value = stillThere ? previous : latestMine ? latestMine.id : '';
+    sel.value = '';
   }
 
   function renderPeople() {
-    const list = document.getElementById('guest-list');
+    const list = $('guest-list');
     list.replaceChildren();
     const total = state.person.reduce((n, p) => n + p.partySize, 0);
-    document.getElementById('guest-count').textContent =
-      state.person.length ? `${total} ${total === 1 ? 'person' : 'people'}` : '';
+    $('guest-count').textContent = state.person.length ? `${total} ${total === 1 ? 'person' : 'people'}` : '';
     if (!state.person.length) {
       list.append(el('li', { class: 'empty' }, 'No one yet. Be the first!'));
       return;
@@ -82,138 +88,192 @@
       const dishes = state.food.filter((f) => f.personId === p.id).map((f) => f.dish);
       const text = el('div', {},
         el('span', { class: 'who' }, p.name),
+        p.id === me ? el('span', { class: 'you' }, 'you') : '',
         p.partySize > 1 ? el('span', { class: 'badge' }, `+${p.partySize - 1}`) : '',
         p.note ? el('span', { class: 'sub' }, p.note) : '',
         dishes.length ? el('span', { class: 'sub bringing' }, `Bringing: ${dishes.join(', ')}`) : '',
       );
-      list.append(el('li', {}, text, rowActions('person', p.id)));
+      list.append(el('li', {}, text, p.id === me ? actions(startEditPerson, removeMe) : ''));
     }
   }
 
   function renderFood() {
-    const root = document.getElementById('food-list');
+    const root = $('food-list');
     root.replaceChildren();
-    document.getElementById('food-count').textContent =
+    $('food-count').textContent =
       state.food.length ? `${state.food.length} ${state.food.length === 1 ? 'dish' : 'dishes'}` : '';
     const known = new Set(CATEGORIES.map(([key]) => key));
     for (const [key, label] of CATEGORIES) {
       // Entries with a retired category (e.g. an old "main") are shown under Other, not hidden.
-      const items = state.food.filter((f) => (key === 'other' ? !known.has(f.category) || f.category === 'other' : f.category === key));
+      const items = state.food.filter((f) =>
+        key === 'other' ? !known.has(f.category) || f.category === 'other' : f.category === key);
       if (!items.length && key === 'other') continue;
       const cat = el('div', { class: `cat${items.length ? '' : ' empty-cat'}` }, el('h4', {}, label));
       if (!items.length) cat.append(el('p', { class: 'none' }, 'Nothing yet'));
       for (const f of items) {
         cat.append(el('div', { class: 'dish' },
           el('div', {}, el('span', { class: 'who' }, f.dish), el('span', { class: 'sub' }, `from ${bringerOf(f)}`)),
-          rowActions('food', f.id),
+          f.personId === me ? actions(() => startEditFood(f.id), () => removeFood(f.id)) : '',
         ));
       }
       root.append(cat);
     }
   }
 
-  const render = () => { populatePeopleSelect(); renderPeople(); renderFood(); };
+  function render() {
+    // If the guest you picked no longer exists (removed from another device), go back to "Who are you?".
+    if (me && !meGuest()) {
+      me = null;
+      localStorage.removeItem(ME_KEY);
+    }
+    const signedIn = Boolean(me);
+    $('gate').hidden = signedIn;
+    $('app').hidden = !signedIn;
+    if (!signedIn) return renderGate();
 
-  const forms = {
-    person: document.getElementById('guest-form'),
-    food: document.getElementById('food-form'),
-  };
-  const labels = {
-    person: { add: 'Add me', save: 'Save changes', title: ['Count me in', 'Edit your entry'] },
-    food: { add: 'Add dish', save: 'Save changes', title: ['Sign up a dish', 'Edit your dish'] },
-  };
-
-  function resetForm(kind) {
-    const form = forms[kind];
-    const keepPerson = kind === 'food' ? form.personId.value : '';
-    form.reset();
-    if (kind === 'person') form.partySize.value = 1;
-    if (kind === 'food') form.personId.value = keepPerson; // adding a second dish should be quick
-    editing[kind] = null;
-    form.querySelector('.primary').textContent = labels[kind].add;
-    form.querySelector('h3').textContent = labels[kind].title[0];
-    form.querySelector('.cancel').hidden = true;
-    form.querySelector('.error').textContent = '';
+    $('me-name').textContent = meGuest().name;
+    $('guest-form').hidden = !editing.person;
+    $('food-form-title').textContent = editing.foodId ? 'Edit your dish' : `Add a dish for ${meGuest().name}`;
+    forms.food.querySelector('.primary').textContent = editing.foodId ? 'Save changes' : 'Add dish';
+    forms.food.querySelector('.cancel').hidden = !editing.foodId;
+    renderPeople();
+    renderFood();
   }
 
-  function startEdit(kind, id) {
-    const item = state[kind].find((x) => x.id === id);
-    if (!item) return;
-    const form = forms[kind];
-    for (const field of form.elements) {
-      if (field.name && item[field.name] !== undefined) field.value = item[field.name];
-    }
-    if (kind === 'food' && !form.category.value) form.category.value = 'other'; // retired category
-    editing[kind] = id;
-    form.querySelector('.primary').textContent = labels[kind].save;
-    form.querySelector('h3').textContent = labels[kind].title[1];
-    form.querySelector('.cancel').hidden = false;
+  const forms = { rsvp: $('rsvp-form'), person: $('guest-form'), food: $('food-form') };
+  const showError = (form, msg) => { form.querySelector('.error').textContent = msg; };
+
+  function startEditPerson() {
+    const mine = meGuest();
+    const form = forms.person;
+    form.elements.name.value = mine.name;
+    form.elements.partySize.value = mine.partySize;
+    form.elements.note.value = mine.note || '';
+    showError(form, '');
+    editing.person = true;
+    render();
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  async function remove(kind, id) {
-    const dishes = kind === 'person' ? state.food.filter((f) => f.personId === id).length : 0;
-    const message = dishes
-      ? `Remove this guest and their ${dishes} ${dishes === 1 ? 'dish' : 'dishes'}?`
-      : 'Remove this entry?';
-    if (!confirm(message)) return;
+  function startEditFood(id) {
+    const dish = state.food.find((f) => f.id === id);
+    if (!dish) return;
+    const form = forms.food;
+    form.elements.dish.value = dish.dish;
+    form.elements.category.value = CATEGORIES.some(([key]) => key === dish.category) ? dish.category : 'other';
+    showError(form, '');
+    editing.foodId = id;
+    render();
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function removeMe() {
+    const n = state.food.filter((f) => f.personId === me).length;
+    const msg = n
+      ? `Remove yourself and your ${n} ${n === 1 ? 'dish' : 'dishes'}?`
+      : 'Remove yourself from the list?';
+    if (!confirm(msg)) return;
     try {
-      await api('DELETE', `${kind}/${id}`, null, tokens[`${kind}:${id}`]);
-      delete tokens[`${kind}:${id}`];
-      saveTokens();
-      state[kind] = state[kind].filter((x) => x.id !== id);
-      if (kind === 'person') state.food = state.food.filter((f) => f.personId !== id);
+      await api('DELETE', `person/${me}`);
+      state.person = state.person.filter((p) => p.id !== me);
+      state.food = state.food.filter((f) => f.personId !== me);
+      setMe(null);
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  async function removeFood(id) {
+    if (!confirm('Remove this dish?')) return;
+    try {
+      await api('DELETE', `food/${id}`);
+      state.food = state.food.filter((f) => f.id !== id);
       render();
     } catch (err) {
       alert(err.message);
     }
   }
 
-  for (const kind of ['person', 'food']) {
-    const form = forms[kind];
-    form.querySelector('.cancel').addEventListener('click', () => resetForm(kind));
+  // Run a form submit with a disabled button and an inline error message.
+  function onSubmit(form, handler) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = form.querySelector('.primary');
-      const errBox = form.querySelector('.error');
-      errBox.textContent = '';
+      showError(form, '');
       btn.disabled = true;
-      const body = Object.fromEntries(new FormData(form));
-      let justAddedPersonId = null;
       try {
-        if (editing[kind]) {
-          const id = editing[kind];
-          const updated = await api('PUT', `${kind}/${id}`, body, tokens[`${kind}:${id}`]);
-          state[kind] = state[kind].map((x) => (x.id === id ? updated : x));
-        } else {
-          const created = await api('POST', kind, body);
-          tokens[`${kind}:${created.id}`] = created.editToken;
-          saveTokens();
-          const { editToken, ...entry } = created;
-          state[kind].push(entry);
-          if (kind === 'person') justAddedPersonId = created.id;
-        }
-        resetForm(kind);
-        render();
-        // Someone who just added themselves is about to sign up a dish: preselect them.
-        if (justAddedPersonId) document.getElementById('food-person').value = justAddedPersonId;
+        await handler(Object.fromEntries(new FormData(form)));
       } catch (err) {
-        errBox.textContent = err.message;
+        showError(form, err.message);
       } finally {
         btn.disabled = false;
       }
     });
   }
 
-  async function load() {
+  $('gate-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = $('gate-person').value;
+    if (id) setMe(id);
+  });
+
+  onSubmit(forms.rsvp, async (body) => {
+    // Typing a name that is already on the list signs you in as that person instead of making a duplicate.
+    const existing = state.person.find((p) => norm(p.name) === norm(body.name));
+    if (existing) { forms.rsvp.reset(); return setMe(existing.id); }
     try {
-      [state.person, state.food] = await Promise.all([api('GET', 'person'), api('GET', 'food')]);
-      render();
+      const created = await api('POST', 'person', body);
+      state.person.push(created);
+      forms.rsvp.reset();
+      setMe(created.id);
     } catch (err) {
-      document.getElementById('guest-list').replaceChildren(el('li', { class: 'empty' }, 'Could not load the list. Refresh to retry.'));
-      document.getElementById('food-list').replaceChildren(el('p', { class: 'empty' }, 'Could not load the list. Refresh to retry.'));
+      if (err.status === 409 && err.data.existingId) {
+        await load(); // someone else just added the same name; sign in as them
+        forms.rsvp.reset();
+        return setMe(err.data.existingId);
+      }
+      throw err;
     }
+  });
+
+  onSubmit(forms.person, async (body) => {
+    const updated = await api('PUT', `person/${me}`, body);
+    state.person = state.person.map((p) => (p.id === me ? updated : p));
+    editing.person = false;
+    render();
+  });
+  forms.person.querySelector('.cancel').addEventListener('click', () => { editing.person = false; render(); });
+
+  onSubmit(forms.food, async (body) => {
+    if (editing.foodId) {
+      const updated = await api('PUT', `food/${editing.foodId}`, body);
+      state.food = state.food.map((f) => (f.id === editing.foodId ? updated : f));
+      editing.foodId = null;
+    } else {
+      state.food.push(await api('POST', 'food', body));
+    }
+    forms.food.reset();
+    render();
+  });
+  forms.food.querySelector('.cancel').addEventListener('click', () => {
+    editing.foodId = null;
+    forms.food.reset();
+    render();
+  });
+
+  $('not-me').addEventListener('click', () => setMe(null));
+
+  async function load() {
+    [state.person, state.food] = await Promise.all([api('GET', 'person'), api('GET', 'food')]);
+    $('loading').hidden = true;
+    render();
   }
 
-  load();
+  load().catch(() => { $('loading').textContent = 'Could not load the list. Refresh to retry.'; });
+
+  // Pick up other people's changes when someone comes back to the tab.
+  document.addEventListener('visibilitychange', () => {
+    // ($('loading').hidden is true once the first load succeeded.)
+    if (document.visibilityState === 'visible' && $('loading').hidden) load().catch(() => {});
+  });
 })();

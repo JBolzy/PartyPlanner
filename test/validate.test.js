@@ -28,31 +28,26 @@ test('person: rejects oversized fields', () => {
   assert.equal(validate('person', { name: 'A', note: 'x'.repeat(201) }).ok, false);
 });
 
-test('food: accepts side, dessert, drink, other, tied to a person by id', () => {
+test('food: accepts side, dessert, drink, other', () => {
   for (const category of ['side', 'dessert', 'drink', 'other']) {
-    const r = validate('food', { dish: 'Mac & cheese', personId: 'p-1', category });
-    assert.deepEqual(r.value, { dish: 'Mac & cheese', personId: 'p-1', category });
+    const r = validate('food', { dish: ' Mac & cheese ', category });
+    assert.deepEqual(r.value, { dish: 'Mac & cheese', category });
   }
 });
 
-test('food: ignores a typed-in name; who is bringing it comes only from personId', () => {
-  const r = validate('food', { dish: 'Pie', personId: 'p-1', category: 'dessert', bringerName: 'Hacker' });
-  assert.deepEqual(r.value, { dish: 'Pie', personId: 'p-1', category: 'dessert' });
+test('food: who is bringing it is never taken from the body (the server uses the signed-in guest)', () => {
+  const r = validate('food', { dish: 'Pie', category: 'dessert', personId: 'someone-else', bringerName: 'Hacker' });
+  assert.deepEqual(r.value, { dish: 'Pie', category: 'dessert' });
 });
 
 test('food: pizza is covered, so "main" is no longer a category', () => {
-  assert.equal(validate('food', { dish: 'Lasagna', personId: 'p-1', category: 'main' }).ok, false);
+  assert.equal(validate('food', { dish: 'Lasagna', category: 'main' }).ok, false);
 });
 
-test('food: rejects missing/blank/non-string personId', () => {
-  assert.equal(validate('food', { dish: 'X', category: 'side' }).ok, false);
-  assert.equal(validate('food', { dish: 'X', personId: '  ', category: 'side' }).ok, false);
-  assert.equal(validate('food', { dish: 'X', personId: 5, category: 'side' }).ok, false);
-});
-
-test('food: rejects bad category, blanks, non-string input', () => {
-  assert.equal(validate('food', { dish: 'X', personId: 'p', category: 'snack' }).ok, false);
-  assert.equal(validate('food', { dish: '', personId: 'p', category: 'side' }).ok, false);
-  assert.equal(validate('food', { dish: { a: 1 }, personId: 'p', category: 'side' }).ok, false);
+test('food: rejects bad category, blanks, oversized, non-string input', () => {
+  assert.equal(validate('food', { dish: 'X', category: 'snack' }).ok, false);
+  assert.equal(validate('food', { dish: '   ', category: 'side' }).ok, false);
+  assert.equal(validate('food', { dish: 'x'.repeat(81), category: 'side' }).ok, false);
+  assert.equal(validate('food', { dish: { a: 1 }, category: 'side' }).ok, false);
   assert.equal(validate('food', null).ok, false);
 });

@@ -15,5 +15,5 @@ npm test
 ```
 Tests use an in-memory stand-in for the database. To run against the real DB locally: `npx netlify dev` with `MONGODB_URI` in a git-ignored `.env`.
 
-## How editing works
-No logins. Creating an entry returns a random token, saved in that browser's localStorage; the server stores only its hash. Edit/Remove need that token, so people can only change their own entries from the same device.
+## How "who are you" works
+No passwords on the app itself (put the site behind Netlify's site password). On first load a visitor either picks their name from the list or RSVPs (name + group size). The page remembers the choice on that device, and it works from any device by picking the name again. The page sends the chosen guest id in an `x-person-id` header; the API only lets that guest add, edit or remove their own RSVP and dishes. Everyone can read everything. This is an honor system: anyone can pick any name.

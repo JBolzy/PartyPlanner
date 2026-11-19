@@ -48,60 +48,87 @@
   </header>
 
   <main>
-    <section class="card" aria-labelledby="guests-h">
-      <div class="card-head">
-        <h2 id="guests-h">Who's coming</h2>
-        <span class="count" id="guest-count"></span>
-      </div>
-      <p class="hint">Let us know if you think you'll make it. It just helps us order enough pizza. Plans change, so no pressure either way.</p>
-      <ul class="list" id="guest-list"><li class="empty">Loading…</li></ul>
-      <form id="guest-form" class="form" autocomplete="off">
-        <h3 id="guest-form-title">Count me in</h3>
-        <label>Your name <input name="name" maxlength="60" required></label>
-        <label>How many in your group? <input name="partySize" type="number" min="1" max="20" value="1" required></label>
-        <label>Note <span class="opt">(optional)</span> <input name="note" maxlength="200" placeholder="Allergies, arriving late, etc."></label>
-        <p class="error" role="alert"></p>
-        <div class="actions">
-          <button type="submit" class="primary">Add me</button>
-          <button type="button" class="ghost cancel" hidden>Cancel</button>
-        </div>
-      </form>
-    </section>
+    <p class="empty center" id="loading">Loading…</p>
 
-    <section class="card" aria-labelledby="food-h">
-      <div class="card-head">
-        <h2 id="food-h">What we're bringing</h2>
-        <span class="count" id="food-count"></span>
-      </div>
-      <p class="hint">Pizza is covered! Sign up for a side, dessert or drinks so we don't end up with six bags of chips and no ice.</p>
-      <div id="food-list"><p class="empty">Loading…</p></div>
-      <form id="food-form" class="form" autocomplete="off">
-        <h3 id="food-form-title">Sign up a dish</h3>
-        <label>Your name
-          <select name="personId" id="food-person" required>
+    <!-- Step 1: "Who are you?" Honor system: no passwords here, the whole site sits behind a site password. -->
+    <section class="card" id="gate" hidden aria-labelledby="gate-h">
+      <h2 id="gate-h">Who are you?</h2>
+      <p class="hint">Pick your name to see who's coming and what everyone's bringing.</p>
+      <form id="gate-form" class="form" autocomplete="off">
+        <label>I'm
+          <select name="personId" id="gate-person" required>
             <option value="" disabled selected>Choose your name…</option>
           </select>
         </label>
-        <p class="hint tight" id="food-person-hint">Not on the list? Add yourself under "Who's coming" first. Bringing more than one thing? Just add each dish separately.</p>
-        <label>Dish <input name="dish" maxlength="80" required placeholder="Grandma's mac &amp; cheese"></label>
-        <label>Type
-          <select name="category" required>
-            <option value="side">Side</option>
-            <option value="dessert">Dessert</option>
-            <option value="drink">Drink</option>
-            <option value="other">Other</option>
-          </select>
-        </label>
+        <div class="actions"><button type="submit" class="primary">That's me</button></div>
+      </form>
+
+      <form id="rsvp-form" class="form" autocomplete="off">
+        <h3>First time here? RSVP</h3>
+        <p class="hint tight">Let us know if you think you'll make it. It just helps us order enough pizza. No pressure either way.</p>
+        <label>Your name <input name="name" maxlength="60" required placeholder="First and last name"></label>
+        <label>How many in your group, including you? <input name="partySize" type="number" min="1" max="20" value="1" required></label>
         <p class="error" role="alert"></p>
-        <div class="actions">
-          <button type="submit" class="primary">Add dish</button>
-          <button type="button" class="ghost cancel" hidden>Cancel</button>
-        </div>
+        <div class="actions"><button type="submit" class="primary">RSVP</button></div>
       </form>
     </section>
+
+    <!-- Step 2: everyone's lists. You can only change your own RSVP and your own dishes. -->
+    <div id="app" hidden>
+      <div class="me-bar">
+        <span>Signed in as <strong id="me-name"></strong></span>
+        <button type="button" class="link" id="not-me">Not you?</button>
+      </div>
+
+      <section class="card" aria-labelledby="guests-h">
+        <div class="card-head">
+          <h2 id="guests-h">Who's coming</h2>
+          <span class="count" id="guest-count"></span>
+        </div>
+        <ul class="list" id="guest-list"></ul>
+        <form id="guest-form" class="form" autocomplete="off" hidden>
+          <h3>Edit your RSVP</h3>
+          <label>Your name <input name="name" maxlength="60" required></label>
+          <label>How many in your group, including you? <input name="partySize" type="number" min="1" max="20" required></label>
+          <label>Note <span class="opt">(optional)</span> <input name="note" maxlength="200" placeholder="Allergies, arriving late, etc."></label>
+          <p class="error" role="alert"></p>
+          <div class="actions">
+            <button type="submit" class="primary">Save changes</button>
+            <button type="button" class="ghost cancel">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="food-h">
+        <div class="card-head">
+          <h2 id="food-h">What we're bringing</h2>
+          <span class="count" id="food-count"></span>
+        </div>
+        <p class="hint">Pizza is covered! Sign up for a side, dessert or drinks so we don't end up with six bags of chips and no ice.</p>
+        <div id="food-list"></div>
+        <form id="food-form" class="form" autocomplete="off">
+          <h3 id="food-form-title">Add a dish</h3>
+          <p class="hint tight">Bringing more than one thing? Just add each dish separately.</p>
+          <label>Dish <input name="dish" maxlength="80" required placeholder="Grandma's mac &amp; cheese"></label>
+          <label>Type
+            <select name="category" required>
+              <option value="side">Side</option>
+              <option value="dessert">Dessert</option>
+              <option value="drink">Drink</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <p class="error" role="alert"></p>
+          <div class="actions">
+            <button type="submit" class="primary">Add dish</button>
+            <button type="button" class="ghost cancel" hidden>Cancel</button>
+          </div>
+        </form>
+      </section>
+    </div>
   </main>
 
-  <footer>You can edit or remove entries you added from this device.</footer>
+  <footer>Everyone can see the lists. You can only change your own RSVP and your own dishes.</footer>
   <script src="countdown.js"></script>
   <script src="app.js"></script>
 </body>
