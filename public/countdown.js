@@ -51,13 +51,13 @@ if (typeof document !== 'undefined') {
       root.dataset.state = state;
       if (state === 'before') {
         const b = breakdown(Date.parse(PARTY_START) - now);
-        status.textContent = 'The party starts in';
+        status.textContent = 'We get together in';
         for (const unit of Object.keys(nums)) setNum(unit, b[unit]);
-        const minuteText = `${b.days} days, ${b.hours} hours and ${b.minutes} minutes until the party`;
+        const minuteText = `${b.days} days, ${b.hours} hours and ${b.minutes} minutes until the get-together`;
         if (minuteText !== lastMinuteText) { sr.textContent = minuteText; lastMinuteText = minuteText; }
       } else if (state === 'live') {
-        status.textContent = "It's party time! 🎄";
-        sr.textContent = "It's party time!";
+        status.textContent = "It's time to get together! 🎄";
+        sr.textContent = "It's time to get together!";
       } else {
         status.textContent = 'Merry Christmas! Thanks for celebrating with us.';
         sr.textContent = status.textContent;

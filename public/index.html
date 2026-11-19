@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bolzman Family Christmas</title>
+  <title>Bolzman Family Christmas Get-Together</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,10 +12,11 @@
 <body>
   <header class="hero">
     <p class="eyebrow">You're invited</p>
-    <h1>Family Christmas Party</h1>
+    <h1>Family Christmas Get&#8209;Together</h1>
+    <p class="lede">A low-key afternoon to catch up with family we don't see often enough. Come if you can. No worries if you can't.</p>
 
-    <section class="countdown" id="countdown" data-state="before" aria-label="Countdown to the party">
-      <p class="cd-status" id="cd-status">The party starts in</p>
+    <section class="countdown" id="countdown" data-state="before" aria-label="Countdown to the get-together">
+      <p class="cd-status" id="cd-status">We get together in</p>
       <div class="cd-grid" aria-hidden="true">
         <div class="cd-tile"><span class="cd-num" data-unit="days">--</span><span class="cd-label">days</span></div>
         <div class="cd-tile"><span class="cd-num" data-unit="hours">--</span><span class="cd-label">hours</span></div>
@@ -34,6 +35,10 @@
           <a href="https://www.google.com/maps/search/?api=1&amp;query=5355+Jillian+Dr%2C+Bay+City%2C+MI+48706" target="_blank" rel="noopener">5355 Jillian Dr, Bay City, MI 48706</a>
         </dd>
       </div>
+      <div class="wide">
+        <dt>The plan</dt>
+        <dd>🍕 Pizza's on us. Please bring a <strong>side</strong>, a <strong>dessert</strong> or some <strong>drinks</strong> to share. No gifts, nothing fancy.</dd>
+      </div>
     </dl>
 
     <a class="cal-btn" href="christmas-party.ics" download="christmas-party.ics">
@@ -48,6 +53,7 @@
         <h2 id="guests-h">Who's coming</h2>
         <span class="count" id="guest-count"></span>
       </div>
+      <p class="hint">Let us know if you think you'll make it. It just helps us order enough pizza. Plans change, so no pressure either way.</p>
       <ul class="list" id="guest-list"><li class="empty">Loading…</li></ul>
       <form id="guest-form" class="form" autocomplete="off">
         <h3 id="guest-form-title">Count me in</h3>
@@ -67,6 +73,7 @@
         <h2 id="food-h">What we're bringing</h2>
         <span class="count" id="food-count"></span>
       </div>
+      <p class="hint">Pizza is covered! Sign up for a side, dessert or drinks so we don't end up with six bags of chips and no ice.</p>
       <div id="food-list"><p class="empty">Loading…</p></div>
       <form id="food-form" class="form" autocomplete="off">
         <h3 id="food-form-title">Sign up a dish</h3>
@@ -74,7 +81,6 @@
         <label>Your name <input name="bringerName" maxlength="60" required></label>
         <label>Type
           <select name="category" required>
-            <option value="main">Main</option>
             <option value="side">Side</option>
             <option value="dessert">Dessert</option>
             <option value="drink">Drink</option>

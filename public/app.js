@@ -1,6 +1,5 @@
 (() => {
   const CATEGORIES = [
-    ['main', 'Mains'],
     ['side', 'Sides'],
     ['dessert', 'Desserts'],
     ['drink', 'Drinks'],
@@ -69,8 +68,10 @@
     root.replaceChildren();
     document.getElementById('food-count').textContent =
       state.food.length ? `${state.food.length} ${state.food.length === 1 ? 'dish' : 'dishes'}` : '';
+    const known = new Set(CATEGORIES.map(([key]) => key));
     for (const [key, label] of CATEGORIES) {
-      const items = state.food.filter((f) => f.category === key);
+      // Entries with a retired category (e.g. an old "main") are shown under Other, not hidden.
+      const items = state.food.filter((f) => (key === 'other' ? !known.has(f.category) || f.category === 'other' : f.category === key));
       if (!items.length && key === 'other') continue;
       const cat = el('div', { class: `cat${items.length ? '' : ' empty-cat'}` }, el('h4', {}, label));
       if (!items.length) cat.append(el('p', { class: 'none' }, 'Nothing yet'));
@@ -113,6 +114,7 @@
     for (const field of form.elements) {
       if (field.name && item[field.name] !== undefined) field.value = item[field.name];
     }
+    if (kind === 'food' && !form.category.value) form.category.value = 'other'; // retired category
     editing[kind] = id;
     form.querySelector('.primary').textContent = labels[kind].save;
     form.querySelector('h3').textContent = labels[kind].title[1];

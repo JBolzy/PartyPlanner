@@ -84,7 +84,11 @@ h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp
 .details div { background: rgba(255,255,255,.08); border-radius: 10px; padding: .7rem 1rem; }
 .details dt { font-size: .72rem; text-transform: uppercase; letter-spacing: .15em; color: var(--gold); font-weight: 700; }
 .details dd { margin: 0; font-size: 1.05rem; }
+.details .wide { grid-column: 1 / -1; }
+.details strong { color: #f3e3b8; }
 .details a { color: #fff; text-underline-offset: 3px; }
+.lede { max-width: 32rem; margin: 1rem auto 0; font-size: 1.1rem; color: #e8efe9; }
+.hint { margin: 0 0 1rem; color: var(--muted); font-size: .95rem; }
 .details a:hover { color: var(--gold); }
 @media (min-width: 40rem) { .details { grid-template-columns: 1fr 1.4fr; } }
 

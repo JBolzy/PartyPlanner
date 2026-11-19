@@ -21,7 +21,7 @@ test('ics start/end match the countdown times', () => {
 });
 
 test('ics has the party name and the address, commas escaped', () => {
-  assert.match(ics, /SUMMARY:Family Christmas Party/);
+  assert.match(ics, /SUMMARY:Family Christmas Get-Together/);
   assert.ok(ics.includes("LOCATION:Doug & Debbie's house\\, 5355 Jillian Dr\\, Bay City\\, MI 48706"));
 });
 

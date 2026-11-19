@@ -12,7 +12,7 @@
 
 ## Design
 - Static HTML/CSS/vanilla JS page: party details (placeholders for date/time/address), **Who's coming** list, **What we're bringing** list, add forms.
-- `person`: name, partySize, note. `food`: dish, bringerName, category (main/side/dessert/drink/other).
+- `person`: name, partySize, note. `food`: dish, bringerName, category (side/dessert/drink/other; host provides pizza as the main, so no "main" category).
 - No logins. Anyone with the link can add. Edit/delete only for entries created from the same browser (random edit token stored in localStorage, hashed/compared server-side).
 - Netlify Functions (Node, `mongodb` driver) read `MONGODB_URI` from env; DB user `partyplanner-app` has readWrite on `partyplanner` only.
 - Basic validation and length limits server-side.
