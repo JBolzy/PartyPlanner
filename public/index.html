@@ -77,8 +77,13 @@
       <div id="food-list"><p class="empty">Loading…</p></div>
       <form id="food-form" class="form" autocomplete="off">
         <h3 id="food-form-title">Sign up a dish</h3>
+        <label>Your name
+          <select name="personId" id="food-person" required>
+            <option value="" disabled selected>Choose your name…</option>
+          </select>
+        </label>
+        <p class="hint tight" id="food-person-hint">Not on the list? Add yourself under "Who's coming" first. Bringing more than one thing? Just add each dish separately.</p>
         <label>Dish <input name="dish" maxlength="80" required placeholder="Grandma's mac &amp; cheese"></label>
-        <label>Your name <input name="bringerName" maxlength="60" required></label>
         <label>Type
           <select name="category" required>
             <option value="side">Side</option>

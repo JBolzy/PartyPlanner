@@ -89,6 +89,8 @@ h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp
 .details a { color: #fff; text-underline-offset: 3px; }
 .lede { max-width: 32rem; margin: 1rem auto 0; font-size: 1.1rem; color: #e8efe9; }
 .hint { margin: 0 0 1rem; color: var(--muted); font-size: .95rem; }
+.hint.tight { margin: -.35rem 0 0; font-size: .85rem; }
+.bringing { color: var(--pine); font-size: .9rem; }
 .details a:hover { color: var(--gold); }
 @media (min-width: 40rem) { .details { grid-template-columns: 1fr 1.4fr; } }
 

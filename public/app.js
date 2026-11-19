@@ -43,6 +43,30 @@
     );
   }
 
+  // Who a dish belongs to is looked up live from the guest list. Entries made before dishes were
+  // linked to people only have a typed name, so fall back to that.
+  const bringerOf = (f) => personName(f.personId) || f.bringerName || 'someone';
+  function personName(id) {
+    const p = state.person.find((x) => x.id === id);
+    return p && p.name;
+  }
+
+  function populatePeopleSelect() {
+    const sel = document.getElementById('food-person');
+    const previous = sel.value;
+    sel.replaceChildren();
+    if (!state.person.length) {
+      sel.append(el('option', { value: '', disabled: '' }, 'No one yet. Add yourself above first'));
+      sel.value = '';
+      return;
+    }
+    sel.append(el('option', { value: '', disabled: '' }, 'Choose your name…'));
+    for (const p of state.person) sel.append(el('option', { value: p.id }, p.name));
+    const mineFirst = state.person.find((p) => mine('person', p.id));
+    const stillThere = state.person.some((p) => p.id === previous);
+    sel.value = stillThere ? previous : mineFirst ? mineFirst.id : '';
+  }
+
   function renderPeople() {
     const list = document.getElementById('guest-list');
     list.replaceChildren();
@@ -54,10 +78,12 @@
       return;
     }
     for (const p of state.person) {
+      const dishes = state.food.filter((f) => f.personId === p.id).map((f) => f.dish);
       const text = el('div', {},
         el('span', { class: 'who' }, p.name),
         p.partySize > 1 ? el('span', { class: 'badge' }, `+${p.partySize - 1}`) : '',
         p.note ? el('span', { class: 'sub' }, p.note) : '',
+        dishes.length ? el('span', { class: 'sub bringing' }, `Bringing: ${dishes.join(', ')}`) : '',
       );
       list.append(el('li', {}, text, rowActions('person', p.id)));
     }
@@ -77,7 +103,7 @@
       if (!items.length) cat.append(el('p', { class: 'none' }, 'Nothing yet'));
       for (const f of items) {
         cat.append(el('div', { class: 'dish' },
-          el('div', {}, el('span', { class: 'who' }, f.dish), el('span', { class: 'sub' }, `from ${f.bringerName}`)),
+          el('div', {}, el('span', { class: 'who' }, f.dish), el('span', { class: 'sub' }, `from ${bringerOf(f)}`)),
           rowActions('food', f.id),
         ));
       }
@@ -85,7 +111,7 @@
     }
   }
 
-  const render = () => { renderPeople(); renderFood(); };
+  const render = () => { populatePeopleSelect(); renderPeople(); renderFood(); };
 
   const forms = {
     person: document.getElementById('guest-form'),
@@ -98,8 +124,10 @@
 
   function resetForm(kind) {
     const form = forms[kind];
+    const keepPerson = kind === 'food' ? form.personId.value : '';
     form.reset();
     if (kind === 'person') form.partySize.value = 1;
+    if (kind === 'food') form.personId.value = keepPerson; // adding a second dish should be quick
     editing[kind] = null;
     form.querySelector('.primary').textContent = labels[kind].add;
     form.querySelector('h3').textContent = labels[kind].title[0];
@@ -123,12 +151,17 @@
   }
 
   async function remove(kind, id) {
-    if (!confirm('Remove this entry?')) return;
+    const dishes = kind === 'person' ? state.food.filter((f) => f.personId === id).length : 0;
+    const message = dishes
+      ? `Remove this guest and their ${dishes} ${dishes === 1 ? 'dish' : 'dishes'}?`
+      : 'Remove this entry?';
+    if (!confirm(message)) return;
     try {
       await api('DELETE', `${kind}/${id}`, null, tokens[`${kind}:${id}`]);
       delete tokens[`${kind}:${id}`];
       saveTokens();
       state[kind] = state[kind].filter((x) => x.id !== id);
+      if (kind === 'person') state.food = state.food.filter((f) => f.personId !== id);
       render();
     } catch (err) {
       alert(err.message);
