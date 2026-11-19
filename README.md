@@ -8,9 +8,6 @@ Family Christmas party page: who's coming + a food signup. Static page in `publi
 3. Trigger a redeploy so the function sees the variable.
 4. Optional: Site configuration → Change site name for a nicer `*.netlify.app` URL.
 
-## Edit the party details
-`public/index.html`, the `<dl class="details">` block (date, place, notes).
-
 ## Develop
 ```
 npm install

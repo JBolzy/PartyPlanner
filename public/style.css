@@ -29,11 +29,7 @@ body {
   border-bottom: 6px solid var(--berry);
 }
 .eyebrow { text-transform: uppercase; letter-spacing: .2em; font-size: .8rem; color: var(--gold); margin: 0 0 .5rem; font-weight: 700; }
-h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp(2rem, 7vw, 3.4rem); margin: 0 0 1.5rem; line-height: 1.1; }
-.details { display: grid; gap: .9rem; max-width: 34rem; margin: 0 auto; text-align: left; }
-.details div { background: rgba(255,255,255,.08); border-radius: 10px; padding: .7rem 1rem; }
-.details dt { font-size: .72rem; text-transform: uppercase; letter-spacing: .15em; color: var(--gold); font-weight: 700; }
-.details dd { margin: 0; font-size: 1.05rem; }
+h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp(2rem, 7vw, 3.4rem); margin: 0; line-height: 1.1; }
 
 main { max-width: 44rem; margin: 0 auto; padding: 1.5rem 1rem 2rem; display: grid; gap: 1.5rem; }
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 2px 0 var(--line); }
@@ -72,5 +68,3 @@ button.ghost { font: inherit; background: transparent; border: 1px solid var(--l
 .error { color: var(--berry); font-weight: 700; margin: 0; min-height: 0; }
 .error:empty { display: none; }
 footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 1rem 2.5rem; }
-
-@media (min-width: 40rem) { .details { grid-template-columns: repeat(2, 1fr); } .details div:last-child { grid-column: 1 / -1; } }
