@@ -207,3 +207,19 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 
 /* ---- Icons that replaced emoji ---- */
 .inline-icon { width: 1.2em; height: 1.2em; vertical-align: -.22em; margin-right: .1rem; color: var(--gold); }
 .cd-tree { width: 1.3em; height: 1.3em; vertical-align: -.25em; margin-right: .4rem; color: var(--gold); }
+
+/* ---- Santa's sleigh: an occasional flyby (see santa.js). Never blocks a tap, never shown with reduced motion. ---- */
+.santa {
+  position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none;
+  width: clamp(96px, 28vw, 150px);
+  animation: santa-fly var(--dur, 10s) linear forwards;
+  will-change: transform;
+}
+.santa-flip { width: 100%; }
+.santa.rtl { animation-direction: reverse; }
+.santa.rtl .santa-flip { transform: scaleX(-1); }
+.santa svg { display: block; width: 100%; height: auto; overflow: visible; animation: santa-bob 1.6s ease-in-out infinite alternate; filter: drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+.santa .o { stroke: #fffdf8; stroke-width: 1.6; paint-order: stroke; stroke-linejoin: round; }
+@keyframes santa-fly { from { transform: translate3d(-170px, 0, 0); } to { transform: translate3d(calc(100vw + 20px), 0, 0); } }
+@keyframes santa-bob { from { transform: translateY(-6px) rotate(-1.5deg); } to { transform: translateY(6px) rotate(1.5deg); } }
+@media (prefers-reduced-motion: reduce) { .santa { display: none; } }
