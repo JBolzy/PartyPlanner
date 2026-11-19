@@ -62,9 +62,10 @@
     }
     sel.append(el('option', { value: '', disabled: '' }, 'Choose your name…'));
     for (const p of state.person) sel.append(el('option', { value: p.id }, p.name));
-    const mineFirst = state.person.find((p) => mine('person', p.id));
+    // Default to the most recent guest added from this device (the list is oldest-first).
+    const latestMine = [...state.person].reverse().find((p) => mine('person', p.id));
     const stillThere = state.person.some((p) => p.id === previous);
-    sel.value = stillThere ? previous : mineFirst ? mineFirst.id : '';
+    sel.value = stillThere ? previous : latestMine ? latestMine.id : '';
   }
 
   function renderPeople() {
@@ -178,6 +179,7 @@
       errBox.textContent = '';
       btn.disabled = true;
       const body = Object.fromEntries(new FormData(form));
+      let justAddedPersonId = null;
       try {
         if (editing[kind]) {
           const id = editing[kind];
@@ -189,9 +191,12 @@
           saveTokens();
           const { editToken, ...entry } = created;
           state[kind].push(entry);
+          if (kind === 'person') justAddedPersonId = created.id;
         }
         resetForm(kind);
         render();
+        // Someone who just added themselves is about to sign up a dish: preselect them.
+        if (justAddedPersonId) document.getElementById('food-person').value = justAddedPersonId;
       } catch (err) {
         errBox.textContent = err.message;
       } finally {
