@@ -129,6 +129,8 @@
     const signedIn = Boolean(me);
     $('gate').hidden = signedIn;
     $('app').hidden = !signedIn;
+    // Countdown, party details and the calendar button only show once someone has signed in.
+    $('party-details').hidden = !signedIn;
     if (!signedIn) return renderGate();
 
     $('me-name').textContent = meGuest().name;

@@ -29,6 +29,29 @@ test('ics has a UID so re-adding updates instead of duplicating', () => {
   assert.match(ics, /UID:[^\r\n]+@/);
 });
 
+test('countdown, details and calendar button live in a wrapper that starts hidden (shown after sign-in)', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+  const wrapper = html.indexOf('id="party-details"');
+  assert.ok(wrapper > -1, 'wrapper exists');
+  assert.match(html.slice(wrapper - 5, wrapper + 40), /id="party-details" hidden/);
+  const at = (s) => html.indexOf(s);
+  // title + intro stay visible; everything from the countdown down is inside the wrapper
+  assert.ok(at('<h1>') < wrapper && at('class="lede"') < wrapper);
+  assert.ok(wrapper < at('id="countdown"') && at('id="countdown"') < at('class="details"'));
+  assert.ok(at('class="details"') < at('class="cal-btn"') && at('class="cal-btn"') < at('</header>'));
+});
+
+test('each countdown unit puts only the number in the card, with the label outside it', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+  const units = html.match(/<div class="cd-unit">[\s\S]*?<\/div>\s*<span class="cd-label">[a-z]+<\/span>\s*<\/div>/g) || [];
+  assert.equal(units.length, 4);
+  for (const u of units) {
+    const card = u.match(/<div class="cd-card">([\s\S]*?)<\/div>/)[1];
+    assert.match(card, /class="cd-num"/);
+    assert.doesNotMatch(card, /cd-label/);
+  }
+});
+
 test('page links to the calendar file with a download attribute', () => {
   const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
   assert.match(html, /<a [^>]*href="christmas-party\.ics"[^>]*download/);

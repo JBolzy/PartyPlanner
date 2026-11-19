@@ -58,25 +58,42 @@ h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp
 .countdown { margin: 1.75rem auto 0; }
 .cd-status { margin: 0 0 .9rem; font-family: "Fraunces", Georgia, serif; font-size: 1.15rem; color: #f3e3b8; }
 .cd-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; max-width: 30rem; margin: 0 auto; }
-.cd-tile {
-  display: grid; gap: .15rem; padding: .85rem .25rem .7rem;
-  border-radius: 14px; position: relative;
-  background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+.cd-unit { display: flex; flex-direction: column; align-items: center; gap: .5rem; min-width: 0; }
+
+/* Flip-clock card: ONLY the number lives in here, with equal space above and below so the fold line
+   runs through the middle of the digits. */
+.cd-card {
+  position: relative; width: 100%; display: grid; place-items: center;
+  padding: .85rem .25rem; border-radius: 12px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,.24) 0 50%, rgba(255,255,255,.09) 50% 100%);
   border: 1px solid rgba(255,255,255,.22);
-  box-shadow: 0 6px 18px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.25);
-  backdrop-filter: blur(2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.3);
 }
-.cd-tile::after { /* the "card fold" line */
-  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(0,0,0,.28);
+.cd-card::after { /* the fold, drawn over the digits */
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-1px);
+  background: rgba(0,0,0,.5); box-shadow: 0 1px 0 rgba(255,255,255,.14); z-index: 2; pointer-events: none;
+}
+.cd-card::before { /* the little hinge notches at each end of the fold */
+  content: ""; position: absolute; left: 0; right: 0; top: calc(50% - 5px); height: 10px; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(circle at 0 50%, rgba(0,0,0,.55) 4px, transparent 4.5px) left / 10px 10px no-repeat,
+    radial-gradient(circle at 100% 50%, rgba(0,0,0,.55) 4px, transparent 4.5px) right / 10px 10px no-repeat;
 }
 .cd-num {
+  position: relative; z-index: 1; display: block;
   font-family: "Fraunces", Georgia, serif; font-weight: 800; line-height: 1;
   font-size: clamp(1.9rem, 8vw, 3rem); font-variant-numeric: tabular-nums; color: #fff;
-  text-shadow: 0 0 18px rgba(200,150,46,.55);
+  text-shadow: 0 0 10px rgba(200,150,46,.5);
 }
-.cd-num.tick { animation: tick .35s ease-out; }
-@keyframes tick { from { transform: translateY(-14%); opacity: .35; } to { transform: none; opacity: 1; } }
-.cd-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .18em; color: var(--gold); font-weight: 700; }
+.cd-num.tick { animation: tick .4s cubic-bezier(.2,.8,.2,1); }
+/* new digits scroll down into the card (the card clips them) */
+@keyframes tick { from { transform: translateY(-55%); opacity: .15; } to { transform: none; opacity: 1; } }
+
+.cd-label { /* its own little box under the card */
+  display: inline-block; padding: .2rem .5rem; border-radius: 8px; max-width: 100%;
+  background: rgba(0,0,0,.24); border: 1px solid rgba(255,255,255,.14);
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .1em; color: var(--gold); font-weight: 700;
+}
 .countdown[data-state="live"] .cd-grid, .countdown[data-state="after"] .cd-grid { display: none; }
 .countdown[data-state="live"] .cd-status, .countdown[data-state="after"] .cd-status { font-size: clamp(1.4rem, 5vw, 2rem); color: #fff; }
 
