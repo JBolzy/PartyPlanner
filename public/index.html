@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bolzman Family Christmas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">You're invited</p>
+    <h1>Family Christmas Party</h1>
+    <!-- EDIT THESE: party details -->
+    <dl class="details">
+      <div><dt>When</dt><dd>Saturday, December 20 · 4:00 PM</dd></div>
+      <div><dt>Where</dt><dd>123 Example Street, Your Town</dd></div>
+      <div><dt>Notes</dt><dd>Bring a dish, an appetite, and your best ugly sweater.</dd></div>
+    </dl>
+  </header>
+
+  <main>
+    <section class="card" aria-labelledby="guests-h">
+      <div class="card-head">
+        <h2 id="guests-h">Who's coming</h2>
+        <span class="count" id="guest-count"></span>
+      </div>
+      <ul class="list" id="guest-list"><li class="empty">Loading…</li></ul>
+      <form id="guest-form" class="form" autocomplete="off">
+        <h3 id="guest-form-title">Count me in</h3>
+        <label>Your name <input name="name" maxlength="60" required></label>
+        <label>How many in your group? <input name="partySize" type="number" min="1" max="20" value="1" required></label>
+        <label>Note <span class="opt">(optional)</span> <input name="note" maxlength="200" placeholder="Allergies, arriving late, etc."></label>
+        <p class="error" role="alert"></p>
+        <div class="actions">
+          <button type="submit" class="primary">Add me</button>
+          <button type="button" class="ghost cancel" hidden>Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="food-h">
+      <div class="card-head">
+        <h2 id="food-h">What we're bringing</h2>
+        <span class="count" id="food-count"></span>
+      </div>
+      <div id="food-list"><p class="empty">Loading…</p></div>
+      <form id="food-form" class="form" autocomplete="off">
+        <h3 id="food-form-title">Sign up a dish</h3>
+        <label>Dish <input name="dish" maxlength="80" required placeholder="Grandma's mac &amp; cheese"></label>
+        <label>Your name <input name="bringerName" maxlength="60" required></label>
+        <label>Type
+          <select name="category" required>
+            <option value="main">Main</option>
+            <option value="side">Side</option>
+            <option value="dessert">Dessert</option>
+            <option value="drink">Drink</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <p class="error" role="alert"></p>
+        <div class="actions">
+          <button type="submit" class="primary">Add dish</button>
+          <button type="button" class="ghost cancel" hidden>Cancel</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>You can edit or remove entries you added from this device.</footer>
+  <script src="app.js"></script>
+</body>
+</html>

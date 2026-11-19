@@ -1,0 +1,13 @@
+{
+  "name": "party-planner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Christmas party guest list and food signup",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "mongodb": "^6.10.0"
+  }
+}
