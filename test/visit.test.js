@@ -81,9 +81,22 @@ test('a bad visitor id is rejected and nothing is stored', async () => {
   assert.equal((stores.visit || []).length, 0);
 });
 
-test('visit only accepts POST, stats only accepts GET, neither takes an id', async () => {
+test('GET /api/visit is the public open counter: just a number, nothing else', async () => {
   const { call } = setup();
-  assert.equal((await call('GET', '/api/visit')).status, 405);
+  const empty = await call('GET', '/api/visit');
+  assert.equal(empty.status, 200);
+  assert.deepEqual(empty.json, { opens: 0 });
+  for (let i = 0; i < 3; i++) await call('POST', '/api/visit', { visitorId: VISITOR }, { 'user-agent': IPHONE });
+  await call('POST', '/api/visit', { visitorId: VISITOR, kind: 'signin', personId: 'g1' }); // a tap is not an open
+  const counted = await call('GET', '/api/visit');
+  assert.deepEqual(counted.json, { opens: 3 });
+  assert.deepEqual(Object.keys(counted.json), ['opens'], 'no device list, no guests, no times');
+});
+
+test('visit takes POST (record) and GET (count) only; stats takes GET only; neither takes an id', async () => {
+  const { call } = setup();
+  assert.equal((await call('PUT', '/api/visit', {})).status, 405);
+  assert.equal((await call('DELETE', '/api/visit')).status, 405);
   assert.equal((await call('POST', '/api/stats', {})).status, 405);
   assert.equal((await call('POST', '/api/visit/abc', { visitorId: VISITOR })).status, 404);
   assert.equal((await call('GET', '/api/stats/abc')).status, 404);

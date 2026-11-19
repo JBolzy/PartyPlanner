@@ -22,3 +22,5 @@ No passwords on the app itself (put the site behind Netlify's site password). On
 Each page open and each tap on "That's me" is logged to the `visit` collection (`POST /api/visit`): time, a random anonymous device id, the guest (if known), and a mobile/desktop flag. No IP address and no browser string are stored, and the log is capped at 50,000 rows.
 
 Read it at `/api/stats` (while signed in to the site password): total opens, unique devices, opens today, the last 7 days (Eastern time), the mobile/desktop split, the 10 busiest devices (short device id, opens, last open, and the guests seen on that device) and how many times each guest has tapped "That's me".
+
+The footer shows a fine-print counter ("Opened 42 times"), fed by `GET /api/visit`, which returns only `{ "opens": N }` (page opens; "That's me" taps are not counted).

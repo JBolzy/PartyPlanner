@@ -8,7 +8,7 @@ function fakeDb() {
       return {
         find: () => ({ sort: () => ({ toArray: async () => rows.map((r) => ({ ...r })) }) }),
         findOne: async (q) => rows.find((r) => r._id === q._id) || null,
-        countDocuments: async () => rows.length,
+        countDocuments: async (q = {}) => rows.filter((r) => Object.entries(q).every(([k, v]) => r[k] === v)).length,
         insertOne: async (d) => void rows.push({ ...d }),
         updateOne: async (q, u) => void Object.assign(rows.find((r) => r._id === q._id), u.$set),
         deleteOne: async (q) => void rows.splice(rows.findIndex((r) => r._id === q._id), 1),

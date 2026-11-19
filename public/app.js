@@ -45,13 +45,24 @@
   }
   function track(kind, personId) {
     try {
-      fetch('/api/visit', {
+      return fetch('/api/visit', {
         method: 'POST',
         headers: { 'content-type': 'application/json', ...(me ? { 'x-person-id': me } : {}) },
         body: JSON.stringify({ visitorId: visitorId(), kind, ...(personId ? { personId } : {}) }),
         keepalive: true,
       }).catch(() => {});
     } catch { /* tracking must never break the page */ }
+    return Promise.resolve();
+  }
+
+  // Fine print at the bottom: how many times the page has been opened (this open included).
+  async function showOpenCount() {
+    try {
+      const { opens } = await api('GET', 'visit');
+      const el = $('open-count');
+      el.textContent = `Opened ${opens.toLocaleString()} ${opens === 1 ? 'time' : 'times'}`;
+      el.hidden = false;
+    } catch { /* the counter is a nicety; if it fails, just don't show it */ }
   }
 
   const state = { person: [], food: [] };
@@ -380,7 +391,7 @@
     render();
   }
 
-  track('open');
+  track('open').then(showOpenCount); // count our own open first so the number includes it
   load().catch(() => { $('loading').textContent = 'Could not load the list. Refresh to retry.'; });
 
   // Pick up other people's changes when someone comes back to the tab.

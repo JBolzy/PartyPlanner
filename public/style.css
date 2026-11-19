@@ -226,3 +226,6 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 
 
 /* Adults and kids are separate pills; kids get their own colour so the two read at a glance. */
 .badge-kid { background: var(--berry); }
+
+/* Fine print under the footer: "Opened 42 times" */
+.fineprint { display: block; margin-top: .6rem; font-size: .7rem; letter-spacing: .02em; opacity: .65; }

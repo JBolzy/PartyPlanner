@@ -103,6 +103,14 @@ test('every food category and the pizza/tree spots have an icon', () => {
   assert.match(html, /id="cd-tree"/, 'tree icon for the party-time message');
 });
 
+test('footer has a hidden-until-loaded fine print open counter, fed by GET /api/visit', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+  const js = fs.readFileSync(path.join(__dirname, '../public/app.js'), 'utf8');
+  const footer = html.slice(html.indexOf('<footer'), html.indexOf('</footer>'));
+  assert.match(footer, /id="open-count"[^>]*hidden|hidden[^>]*id="open-count"/);
+  assert.match(js, /api\('GET', 'visit'\)|fetch\('\/api\/visit'\)/);
+});
+
 test('add-a-dish form starts collapsed behind a button', () => {
   const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
   assert.match(html, /<button[^>]*id="add-dish-btn"/);
