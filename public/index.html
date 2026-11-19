@@ -65,22 +65,22 @@
   <main>
     <p class="empty center" id="loading">Loading…</p>
 
-    <!-- Step 1: "Who are you?" Honor system: no passwords here, the whole site sits behind a site password. -->
+    <!-- Step 1: find your name in the list (or RSVP if it isn't there). Honor system: no passwords here, the whole site sits behind a site password. -->
     <section class="card" id="gate" hidden aria-labelledby="gate-h">
-      <h2 id="gate-h">Who are you?</h2>
-      <p class="hint">Pick your name to see who's coming and what everyone's bringing.</p>
+      <h2 id="gate-h">Find your name</h2>
+      <p class="hint">Most of the family is already on the list. Pick your name to see who's coming and what everyone's bringing.</p>
       <form id="gate-form" class="form" autocomplete="off">
         <label>I'm
           <select name="personId" id="gate-person" required>
-            <option value="" disabled selected>Choose your name…</option>
+            <option value="" disabled selected>Find your name in the list…</option>
           </select>
         </label>
         <div class="actions"><button type="submit" class="primary">That's me</button></div>
       </form>
 
       <form id="rsvp-form" class="form" autocomplete="off">
-        <h3>First time here? RSVP</h3>
-        <p class="hint tight">Let us know if you think you'll make it. It just helps us order enough pizza. No pressure either way.</p>
+        <h3>Can't find your name? RSVP here</h3>
+        <p class="hint tight">Only add yourself if you looked above and don't see your name. It helps us order enough pizza, and there's no pressure either way.</p>
         <label>Your name <input name="name" maxlength="60" required placeholder="First and last name"></label>
         <div class="pair">
           <label><span>Adults <span class="opt">(including you)</span></span> <input name="adults" type="number" inputmode="numeric" min="1" max="20" value="1" required></label>

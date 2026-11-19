@@ -77,10 +77,10 @@
     const sel = $('gate-person');
     sel.replaceChildren();
     if (!state.person.length) {
-      sel.append(el('option', { value: '', disabled: '' }, 'No one yet. RSVP below'));
+      sel.append(el('option', { value: '', disabled: '' }, 'No one on the list yet. RSVP below'));
       return;
     }
-    sel.append(el('option', { value: '', disabled: '', selected: '' }, 'Choose your name…'));
+    sel.append(el('option', { value: '', disabled: '', selected: '' }, 'Find your name in the list…'));
     for (const p of state.person) sel.append(el('option', { value: p.id }, p.name));
     sel.value = '';
   }

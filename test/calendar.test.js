@@ -63,6 +63,22 @@ test('both RSVP forms ask for adults and kids (no single party-size box) and sho
   }
 });
 
+test('sign-in copy sends people to find their name first and only RSVP if they cannot', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+  const js = fs.readFileSync(path.join(__dirname, '../public/app.js'), 'utf8');
+  // "First time here?" made people already on the list RSVP again.
+  assert.doesNotMatch(html, /first time/i);
+  assert.match(html, /Find your name/);
+  assert.match(html, /Can't find your name\? RSVP here/);
+  assert.match(html, /already on the list/i);
+  // the dropdown placeholder (static markup and the one app.js rebuilds) agree
+  assert.match(html, /Find your name in the list…/);
+  assert.match(js, /Find your name in the list…/);
+  assert.doesNotMatch(html + js, /Choose your name/);
+  // the "find your name" card comes before the RSVP form
+  assert.ok(html.indexOf('id="gate-form"') < html.indexOf('id="rsvp-form"'));
+});
+
 test('add-a-dish form starts collapsed behind a button', () => {
   const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
   assert.match(html, /<button[^>]*id="add-dish-btn"/);
