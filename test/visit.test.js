@@ -59,9 +59,24 @@ test("a \"That's me\" click is recorded as a sign-in for the guest that was pick
   const r = await call('POST', '/api/visit', { visitorId: VISITOR, kind: 'signin', personId: 'guest-123' }, { 'user-agent': IPHONE });
   assert.equal(r.status, 201);
   assert.deepEqual(
-    { kind: stores.visit[0].kind, personId: stores.visit[0].personId, visitorId: stores.visit[0].visitorId, device: stores.visit[0].device },
-    { kind: 'signin', personId: 'guest-123', visitorId: VISITOR, device: 'mobile' },
+    { kind: stores.visit[0].kind, via: stores.visit[0].via, personId: stores.visit[0].personId, visitorId: stores.visit[0].visitorId, device: stores.visit[0].device },
+    { kind: 'signin', via: 'pick', personId: 'guest-123', visitorId: VISITOR, device: 'mobile' },
   );
+});
+
+test('a new RSVP is recorded as a sign-in too, labelled via "rsvp" so it can be told apart from a "That\'s me" tap', async () => {
+  const { call, stores } = setup();
+  assert.equal((await call('POST', '/api/visit', { visitorId: VISITOR, kind: 'signin', personId: 'guest-9', via: 'rsvp' })).status, 201);
+  assert.equal((await call('POST', '/api/visit', { visitorId: VISITOR, kind: 'signin', personId: 'guest-9', via: 'pick' })).status, 201);
+  assert.deepEqual(stores.visit.map((v) => [v.kind, v.via]), [['signin', 'rsvp'], ['signin', 'pick']]);
+});
+
+test('"via" only takes pick or rsvp, and page opens never carry one', async () => {
+  const { call, stores } = setup();
+  assert.equal((await call('POST', '/api/visit', { visitorId: VISITOR, kind: 'signin', personId: 'g', via: 'hacked' })).status, 400);
+  assert.equal((await call('POST', '/api/visit', { visitorId: VISITOR, kind: 'open', via: 'rsvp' })).status, 201);
+  assert.equal(stores.visit.length, 1);
+  assert.equal('via' in stores.visit[0], false, 'an open is just an open');
 });
 
 test('a sign-in needs a guest, and unknown kinds are rejected', async () => {
@@ -216,4 +231,12 @@ test('stats with nothing recorded have empty device and sign-in lists', async ()
   const { call } = seeded();
   const s = (await call('GET', '/api/stats')).json;
   assert.deepEqual([s.topDevices, s.signIns], [[], []]);
+});
+
+test('RSVP sign-ins and "That\'s me" taps both count toward a guest\'s sign-in total', async () => {
+  const { call, add } = seeded();
+  add('2026-12-19T10:00:00Z', SUE, 'signin', 'g1'); // the first identification (an RSVP)
+  add('2026-12-20T10:00:00Z', SUE, 'signin', 'g1'); // coming back and tapping "That's me"
+  const s = (await call('GET', '/api/stats')).json;
+  assert.equal(s.signIns[0].count, 2);
 });

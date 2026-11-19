@@ -24,3 +24,5 @@ Each page open and each tap on "That's me" is logged to the `visit` collection (
 Read it at `/api/stats` (while signed in to the site password): total opens, unique devices, opens today, the last 7 days (Eastern time), the mobile/desktop split, the 10 busiest devices (short device id, opens, last open, and the guests seen on that device) and how many times each guest has tapped "That's me".
 
 The footer shows a fine-print counter ("Opened 42 times"), fed by `GET /api/visit`, which returns only `{ "opens": N }` (page opens; "That's me" taps are not counted).
+
+In the `visit` collection, filter on `kind`: `open` is a page open, `signin` is someone identifying themselves. Sign-ins also carry `via`: `pick` for a "That's me" tap, `rsvp` for a new RSVP (or typing a name already on the list). Both count toward a guest's sign-in total in `/api/stats`.

@@ -43,12 +43,12 @@
     }
     return id;
   }
-  function track(kind, personId) {
+  function track(kind, personId, via) {
     try {
       return fetch('/api/visit', {
         method: 'POST',
         headers: { 'content-type': 'application/json', ...(me ? { 'x-person-id': me } : {}) },
-        body: JSON.stringify({ visitorId: visitorId(), kind, ...(personId ? { personId } : {}) }),
+        body: JSON.stringify({ visitorId: visitorId(), kind, ...(personId ? { personId } : {}), ...(via ? { via } : {}) }),
         keepalive: true,
       }).catch(() => {});
     } catch { /* tracking must never break the page */ }
@@ -325,7 +325,7 @@
     e.preventDefault();
     const id = $('gate-person').value;
     if (id) {
-      track('signin', id); // a "That's me" tap
+      track('signin', id, 'pick'); // a "That's me" tap
       setMe(id);
     }
   });
@@ -333,16 +333,18 @@
   onSubmit(forms.rsvp, async (body) => {
     // Typing a name that is already on the list signs you in as that person instead of making a duplicate.
     const existing = state.person.find((p) => norm(p.name) === norm(body.name));
-    if (existing) { resetRsvp(); return setMe(existing.id); }
+    if (existing) { resetRsvp(); track('signin', existing.id, 'rsvp'); return setMe(existing.id); }
     try {
       const created = await api('POST', 'person', body);
       state.person.push(created);
       resetRsvp();
+      track('signin', created.id, 'rsvp'); // a new guest's first identification
       setMe(created.id);
     } catch (err) {
       if (err.status === 409 && err.data.existingId) {
         await load(); // someone else just added the same name; sign in as them
         resetRsvp();
+        track('signin', err.data.existingId, 'rsvp'); // someone else just added the same name
         return setMe(err.data.existingId);
       }
       throw err;
