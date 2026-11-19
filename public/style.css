@@ -88,6 +88,16 @@ h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp
 .details a:hover { color: var(--gold); }
 @media (min-width: 40rem) { .details { grid-template-columns: 1fr 1.4fr; } }
 
+.cal-btn {
+  display: inline-flex; align-items: center; gap: .5rem; margin-top: 1.4rem;
+  padding: .7rem 1.3rem; border-radius: 99px; text-decoration: none; font-weight: 700;
+  color: var(--pine-dark); background: var(--gold); box-shadow: 0 3px 0 #8f6a1c;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.cal-btn:hover { background: #d9a53b; transform: translateY(-1px); box-shadow: 0 4px 0 #8f6a1c; }
+.cal-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #8f6a1c; }
+.cal-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) {

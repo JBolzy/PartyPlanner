@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Bolzman Family//Christmas Party//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:christmas-party-2026@bolzmanchristmasparty.netlify.app
+DTSTAMP:20261119T120000Z
+DTSTART:20261222T180000Z
+DTEND:20261223T020000Z
+SUMMARY:Family Christmas Party
+LOCATION:Doug & Debbie's house\, 5355 Jillian Dr\, Bay City\, MI 48706
+DESCRIPTION:Bring a dish! Sign up for food and see who's coming: https://bolzmanchristmasparty.netlify.app
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Family Christmas Party is tomorrow at 1:00 PM
+TRIGGER:-P1D
+END:VALARM
+END:VEVENT
+END:VCALENDAR
