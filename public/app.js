@@ -1,10 +1,32 @@
 (() => {
   const CATEGORIES = [
-    ['side', 'Sides', '🥗'],
-    ['dessert', 'Desserts', '🍰'],
-    ['drink', 'Drinks', '🥤'],
-    ['other', 'Other', '🍽️'],
+    ['side', 'Sides'],
+    ['dessert', 'Desserts'],
+    ['drink', 'Drinks'],
+    ['other', 'Other'],
   ];
+
+  // Line icons (24x24, stroked in the panel's colour). Built with createElementNS, never innerHTML.
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const ICONS = {
+    side: ['M3 11h18a9 9 0 0 1-18 0z', 'M8 11c0-3 2-5 4-5s4 2 4 5'], // salad bowl
+    dessert: ['M6 13h12l-1.5 8h-9z', 'M5 13a7 7 0 0 1 14 0', 'M12 4m-1 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0'], // cupcake
+    drink: ['M6 8h12l-1.5 13h-9z', 'M5 8h14', 'M13 8l1.5-5h3'], // cup with straw
+    other: ['M5 3v6a3 3 0 0 0 6 0V3', 'M8 3v6', 'M8 12v9', 'M17 21V3c-2 1.5-3 4-3 7s1 3 3 3'], // fork and knife
+  };
+  function icon(name) {
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    for (const [k, v] of Object.entries({
+      viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2',
+      'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true',
+    })) svg.setAttribute(k, v);
+    for (const d of ICONS[name]) {
+      const path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute('d', d);
+      svg.append(path);
+    }
+    return svg;
+  }
   const ME_KEY = 'partyplanner.me.v1';
   const $ = (id) => document.getElementById(id);
 
@@ -117,14 +139,14 @@
     $('food-count').textContent =
       state.food.length ? `${state.food.length} ${state.food.length === 1 ? 'dish' : 'dishes'}` : '';
     const known = new Set(CATEGORIES.map(([key]) => key));
-    for (const [key, label, icon] of CATEGORIES) {
+    for (const [key, label] of CATEGORIES) {
       // Entries with a retired category (e.g. an old "main") are shown under Other, not hidden.
       const items = state.food.filter((f) =>
         key === 'other' ? !known.has(f.category) || f.category === 'other' : f.category === key);
       if (!items.length && key === 'other') continue;
       const panel = el('section', { class: `cat-panel cat-${key}${items.length ? '' : ' is-empty'}` },
         el('header', { class: 'cat-head' },
-          el('span', { class: 'cat-icon', 'aria-hidden': 'true' }, icon),
+          el('span', { class: 'cat-icon', 'aria-hidden': 'true' }, icon(key)),
           el('h4', {}, label),
           items.length ? el('span', { class: 'cat-count' }, String(items.length)) : el('span', { class: 'cat-none' }, 'Nothing yet'),
         ));

@@ -25,6 +25,7 @@ if (typeof document !== 'undefined') {
     const root = document.getElementById('countdown');
     if (!root) return;
     const status = document.getElementById('cd-status');
+    const tree = document.getElementById('cd-tree'); // little tree icon, only for the party-time message
     const sr = document.getElementById('cd-sr');
     const nums = Object.fromEntries(
       [...root.querySelectorAll('[data-unit]')].map((n) => [n.dataset.unit, n]),
@@ -49,6 +50,8 @@ if (typeof document !== 'undefined') {
       const now = Date.now();
       const state = getState(now);
       root.dataset.state = state;
+      // SVG elements have no .hidden property (that's HTMLElement-only), so toggle the attribute itself.
+      if (tree) tree.toggleAttribute('hidden', state !== 'live');
       if (state === 'before') {
         const b = breakdown(Date.parse(PARTY_START) - now);
         status.textContent = 'We get together in';
@@ -56,7 +59,7 @@ if (typeof document !== 'undefined') {
         const minuteText = `${b.days} days, ${b.hours} hours and ${b.minutes} minutes until the get-together`;
         if (minuteText !== lastMinuteText) { sr.textContent = minuteText; lastMinuteText = minuteText; }
       } else if (state === 'live') {
-        status.textContent = "It's time to get together! 🎄";
+        status.textContent = "It's time to get together!";
         sr.textContent = "It's time to get together!";
       } else {
         status.textContent = 'Merry Christmas! Thanks for celebrating with us.';

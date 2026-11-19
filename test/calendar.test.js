@@ -79,6 +79,24 @@ test('sign-in copy sends people to find their name first and only RSVP if they c
   assert.ok(html.indexOf('id="gate-form"') < html.indexOf('id="rsvp-form"'));
 });
 
+test('the site uses SVG icons, not emoji', () => {
+  for (const file of ['index.html', 'app.js', 'countdown.js', 'style.css']) {
+    const text = fs.readFileSync(path.join(__dirname, '../public', file), 'utf8');
+    const found = text.match(/[\p{Extended_Pictographic}️‍]/gu);
+    assert.equal(found, null, `${file} contains emoji: ${found}`);
+  }
+});
+
+test('every food category and the pizza/tree spots have an icon', () => {
+  const js = fs.readFileSync(path.join(__dirname, '../public/app.js'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+  for (const key of ['side', 'dessert', 'drink', 'other']) {
+    assert.match(js, new RegExp(`\\b${key}:\\s*\\[`), `ICONS.${key}`);
+  }
+  assert.match(html, /class="inline-icon"/, 'pizza icon in The plan');
+  assert.match(html, /id="cd-tree"/, 'tree icon for the party-time message');
+});
+
 test('add-a-dish form starts collapsed behind a button', () => {
   const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
   assert.match(html, /<button[^>]*id="add-dish-btn"/);

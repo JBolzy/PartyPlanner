@@ -182,7 +182,8 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 
 .cat-other   { --tint: #f6ecd0; --edge: #e2d09a; --ink: #6e5210; }
 .cat-head { display: flex; align-items: center; gap: .5rem; padding: .5rem .85rem; background: var(--tint); }
 .cat-panel:not(.is-empty) .cat-head { border-bottom: 1px solid var(--edge); }
-.cat-icon { font-size: 1.15rem; line-height: 1; }
+.cat-icon { display: inline-flex; color: var(--ink); }
+.cat-icon svg { width: 1.3rem; height: 1.3rem; }
 .cat-head h4 { margin: 0; flex: 1; font-size: .78rem; text-transform: uppercase; letter-spacing: .14em; color: var(--ink); }
 .cat-count { min-width: 1.5rem; text-align: center; padding: .05rem .5rem; border-radius: 99px; background: var(--ink); color: #fff; font-size: .78rem; font-weight: 800; }
 .cat-none { color: var(--muted); font-size: .85rem; font-style: italic; }
@@ -202,3 +203,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 
 .total { margin: 0; color: var(--muted); font-size: .95rem; }
 .total strong { color: var(--pine-dark); }
 .count small { display: block; text-align: right; font-weight: 400; font-size: .8rem; }
+
+/* ---- Icons that replaced emoji ---- */
+.inline-icon { width: 1.2em; height: 1.2em; vertical-align: -.22em; margin-right: .1rem; color: var(--gold); }
+.cd-tree { width: 1.3em; height: 1.3em; vertical-align: -.25em; margin-right: .4rem; color: var(--gold); }
