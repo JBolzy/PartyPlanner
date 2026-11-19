@@ -163,7 +163,8 @@ input:focus, select:focus, button:focus-visible { outline: 3px solid var(--gold)
 .actions { display: flex; gap: .6rem; }
 button.primary { font: inherit; font-weight: 700; background: var(--berry); color: #fff; border: 0; border-radius: 10px; padding: .7rem 1.3rem; cursor: pointer; }
 button.primary:hover { background: #961f19; }
-button.primary:disabled { opacity: .6; cursor: wait; }
+button.primary:disabled { opacity: .4; cursor: not-allowed; background: #8a7a74; }
+button.primary:disabled:hover { background: #8a7a74; }
 button.ghost { font: inherit; background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: .7rem 1.1rem; cursor: pointer; }
 .error { color: var(--berry); font-weight: 700; margin: 0; min-height: 0; }
 .error:empty { display: none; }

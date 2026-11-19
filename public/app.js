@@ -153,7 +153,11 @@
     $('app').hidden = !signedIn;
     // Countdown, party details and the calendar button only show once someone has signed in.
     $('party-details').hidden = !signedIn;
-    if (!signedIn) return renderGate();
+    if (!signedIn) {
+      renderGate();
+      refreshAllSubmits();
+      return;
+    }
 
     $('me-name').textContent = meGuest().name;
     $('guest-form').hidden = !editing.person;
@@ -165,10 +169,30 @@
     forms.food.querySelector('.primary').textContent = editing.foodId ? 'Save changes' : 'Add dish';
     renderPeople();
     renderFood();
+    refreshAllSubmits();
   }
 
   const forms = { rsvp: $('rsvp-form'), person: $('guest-form'), food: $('food-form') };
   const showError = (form, msg) => { form.querySelector('.error').textContent = msg; };
+
+  // Submit buttons stay disabled until the form has what it needs: every required text box has real text
+  // (spaces don't count), every required choice is made, and numbers are in range.
+  const submitForms = [$('gate-form'), forms.rsvp, forms.person, forms.food];
+  function isReady(form) {
+    const textFilled = [...form.querySelectorAll('input[required]')]
+      .filter((i) => i.type !== 'number')
+      .every((i) => i.value.trim() !== '');
+    return textFilled && form.checkValidity();
+  }
+  function refreshSubmit(form) {
+    const btn = form.querySelector('.primary');
+    if (btn) btn.disabled = !isReady(form);
+  }
+  const refreshAllSubmits = () => submitForms.forEach(refreshSubmit);
+  for (const form of submitForms) {
+    form.addEventListener('input', () => refreshSubmit(form));
+    form.addEventListener('change', () => refreshSubmit(form));
+  }
 
   // "Total: 3 people" = adults + kids, kept live as you type.
   function syncTotal(form) {
@@ -176,7 +200,7 @@
     form.querySelector('[data-total] strong').textContent = plural(n, 'person', 'people');
   }
   for (const form of [forms.rsvp, forms.person]) form.addEventListener('input', () => syncTotal(form));
-  const resetRsvp = () => { forms.rsvp.reset(); syncTotal(forms.rsvp); };
+  const resetRsvp = () => { forms.rsvp.reset(); syncTotal(forms.rsvp); refreshSubmit(forms.rsvp); };
 
   function startEditPerson() {
     const mine = meGuest();
@@ -243,7 +267,7 @@
       } catch (err) {
         showError(form, err.message);
       } finally {
-        btn.disabled = false;
+        refreshSubmit(form); // enabled again only if the form still has what it needs
       }
     });
   }
