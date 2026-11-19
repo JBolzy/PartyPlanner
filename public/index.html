@@ -100,10 +100,14 @@
       </div>
 
       <section class="card" aria-labelledby="guests-h">
-        <div class="card-head">
-          <h2 id="guests-h">Who's coming</h2>
-          <span class="count" id="guest-count"></span>
-        </div>
+        <h2 id="guests-h" class="toggle-heading">
+          <button type="button" class="card-toggle" id="guests-toggle" aria-expanded="false" aria-controls="guests-body">
+            <span class="toggle-title">Who's coming</span>
+            <span class="count" id="guest-count"></span>
+            <svg class="chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </h2>
+        <div id="guests-body" hidden>
         <ul class="list" id="guest-list"></ul>
         <form id="guest-form" class="form" autocomplete="off" hidden>
           <h3>Edit your RSVP</h3>
@@ -120,6 +124,7 @@
             <button type="button" class="ghost cancel">Cancel</button>
           </div>
         </form>
+        </div>
       </section>
 
       <section class="card" aria-labelledby="food-h">

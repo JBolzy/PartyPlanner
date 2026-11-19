@@ -67,7 +67,8 @@
 
   const state = { person: [], food: [] };
   const editing = { person: false, foodId: null };
-  const ui = { foodFormOpen: false }; // the add-a-dish form is collapsed until asked for
+  // Both start collapsed: the add-a-dish form, and the "Who's coming" list (only its headcount shows).
+  const ui = { foodFormOpen: false, guestsOpen: false };
 
   async function api(method, path, body) {
     const res = await fetch(`/api/${path}`, {
@@ -137,12 +138,7 @@
   function renderPeople() {
     const list = $('guest-list');
     list.replaceChildren();
-    const total = state.person.reduce((n, p) => n + p.partySize, 0);
-    const kids = state.person.reduce((n, p) => n + (p.kids || 0), 0);
-    $('guest-count').replaceChildren(...(state.person.length ? [
-      plural(total, 'person', 'people'),
-      el('small', {}, kids ? `${plural(total - kids, 'adult', 'adults')} · ${plural(kids, 'kid', 'kids')}` : plural(total, 'adult', 'adults')),
-    ] : []));
+    $('guest-count').textContent = headcountSummary(state.person); // "29 people | 22 adults · 7 kids"
     if (!state.person.length) {
       list.append(el('li', { class: 'empty' }, 'No one yet. Be the first!'));
       return;
@@ -218,6 +214,7 @@
     forms.food.querySelector('.primary').textContent = editing.foodId ? 'Save changes' : 'Add dish';
     renderPeople();
     renderFood();
+    setGuestsOpen(ui.guestsOpen);
     refreshAllSubmits();
   }
 
@@ -251,6 +248,13 @@
   for (const form of [forms.rsvp, forms.person]) form.addEventListener('input', () => syncTotal(form));
   const resetRsvp = () => { forms.rsvp.reset(); syncTotal(forms.rsvp); refreshSubmit(forms.rsvp); };
 
+  function setGuestsOpen(open) {
+    ui.guestsOpen = open;
+    $('guests-toggle').setAttribute('aria-expanded', String(open));
+    $('guests-body').hidden = !open;
+  }
+  $('guests-toggle').addEventListener('click', () => setGuestsOpen(!ui.guestsOpen));
+
   function startEditPerson() {
     const mine = meGuest();
     const form = forms.person;
@@ -261,6 +265,7 @@
     form.elements.note.value = mine.note || '';
     showError(form, '');
     editing.person = true;
+    setGuestsOpen(true); // the edit form lives inside the collapsible part
     render();
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }

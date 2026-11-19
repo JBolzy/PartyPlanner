@@ -13,4 +13,15 @@ function groupPills(p) {
   return pills;
 }
 
-if (typeof module !== 'undefined') module.exports = { plural, groupPills };
+// The one-line headcount under "Who's coming": "29 people | 22 adults · 7 kids".
+// Older RSVPs that only have a total are counted as adults.
+function headcountSummary(people) {
+  if (!people.length) return 'No one yet';
+  const total = people.reduce((n, p) => n + p.partySize, 0);
+  const kids = people.reduce((n, p) => n + (p.kids || 0), 0);
+  const adults = total - kids;
+  const split = kids ? `${plural(adults, 'adult', 'adults')} \u00b7 ${plural(kids, 'kid', 'kids')}` : plural(adults, 'adult', 'adults');
+  return `${plural(total, 'person', 'people')} | ${split}`;
+}
+
+if (typeof module !== 'undefined') module.exports = { plural, groupPills, headcountSummary };
