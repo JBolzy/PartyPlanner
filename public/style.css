@@ -97,7 +97,7 @@ h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp
 .countdown[data-state="live"] .cd-grid, .countdown[data-state="after"] .cd-grid { display: none; }
 .countdown[data-state="live"] .cd-status, .countdown[data-state="after"] .cd-status { font-size: clamp(1.4rem, 5vw, 2rem); color: #fff; }
 
-.details { display: grid; gap: .9rem; max-width: 34rem; margin: 1.75rem auto 0; text-align: left; }
+.details { display: grid; gap: .9rem; max-width: 34rem; margin: 1.75rem auto 0; text-align: center; }
 .details div { background: rgba(255,255,255,.08); border-radius: 10px; padding: .7rem 1rem; }
 .details dt { font-size: .72rem; text-transform: uppercase; letter-spacing: .15em; color: var(--gold); font-weight: 700; }
 .details dd { margin: 0; font-size: 1.05rem; }
