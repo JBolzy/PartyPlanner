@@ -223,3 +223,6 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 
 @keyframes santa-fly { from { transform: translate3d(-170px, 0, 0); } to { transform: translate3d(calc(100vw + 20px), 0, 0); } }
 @keyframes santa-bob { from { transform: translateY(-6px) rotate(-1.5deg); } to { transform: translateY(6px) rotate(1.5deg); } }
 @media (prefers-reduced-motion: reduce) { .santa { display: none; } }
+
+/* Adults and kids are separate pills; kids get their own colour so the two read at a glance. */
+.badge-kid { background: var(--berry); }

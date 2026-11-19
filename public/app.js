@@ -68,13 +68,7 @@
   // Entries made before dishes were linked to guests only have a typed name.
   const bringerOf = (f) => (state.person.find((p) => p.id === f.personId) || {}).name || f.bringerName || 'someone';
 
-  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
-  // "2 adults · 1 kid". RSVPs made before adults/kids were asked only have a total.
-  function groupLabel(p) {
-    if (p.partySize <= 1) return '';
-    if (p.adults == null) return `party of ${p.partySize}`;
-    return p.kids ? `${plural(p.adults, 'adult', 'adults')} · ${plural(p.kids, 'kid', 'kids')}` : plural(p.adults, 'adult', 'adults');
-  }
+  // plural() and groupPills() come from format.js (loaded before this file).
 
   function setMe(id) {
     me = id;
@@ -125,7 +119,7 @@
       const text = el('div', {},
         el('span', { class: 'who' }, p.name),
         p.id === me ? el('span', { class: 'you' }, 'you') : '',
-        groupLabel(p) ? el('span', { class: 'badge' }, groupLabel(p)) : '',
+        ...groupPills(p).map(({ text, kind }) => el('span', { class: `badge badge-${kind}` }, text)),
         p.note ? el('span', { class: 'sub' }, p.note) : '',
         dishes.length ? el('span', { class: 'sub bringing' }, `Bringing: ${dishes.join(', ')}`) : '',
       );
