@@ -13,6 +13,28 @@
   <header class="hero">
     <p class="eyebrow">You're invited</p>
     <h1>Family Christmas Party</h1>
+
+    <section class="countdown" id="countdown" data-state="before" aria-label="Countdown to the party">
+      <p class="cd-status" id="cd-status">The party starts in</p>
+      <div class="cd-grid" aria-hidden="true">
+        <div class="cd-tile"><span class="cd-num" data-unit="days">--</span><span class="cd-label">days</span></div>
+        <div class="cd-tile"><span class="cd-num" data-unit="hours">--</span><span class="cd-label">hours</span></div>
+        <div class="cd-tile"><span class="cd-num" data-unit="minutes">--</span><span class="cd-label">minutes</span></div>
+        <div class="cd-tile"><span class="cd-num" data-unit="seconds">--</span><span class="cd-label">seconds</span></div>
+      </div>
+      <p class="sr-only" id="cd-sr" aria-live="polite"></p>
+    </section>
+
+    <dl class="details">
+      <div><dt>When</dt><dd>Tuesday, December 22 · 1:00 PM</dd></div>
+      <div>
+        <dt>Where</dt>
+        <dd>
+          Doug &amp; Debbie's house<br>
+          <a href="https://www.google.com/maps/search/?api=1&amp;query=5355+Jillian+Dr%2C+Bay+City%2C+MI+48706" target="_blank" rel="noopener">5355 Jillian Dr, Bay City, MI 48706</a>
+        </dd>
+      </div>
+    </dl>
   </header>
 
   <main>
@@ -64,6 +86,7 @@
   </main>
 
   <footer>You can edit or remove entries you added from this device.</footer>
+  <script src="countdown.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

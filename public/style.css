@@ -31,6 +31,69 @@ body {
 .eyebrow { text-transform: uppercase; letter-spacing: .2em; font-size: .8rem; color: var(--gold); margin: 0 0 .5rem; font-weight: 700; }
 h1 { font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: clamp(2rem, 7vw, 3.4rem); margin: 0; line-height: 1.1; }
 
+/* Falling snow: two tiled layers drifting at different speeds */
+.hero { position: relative; overflow: hidden; isolation: isolate; }
+.hero::before, .hero::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.hero::before {
+  background:
+    radial-gradient(3px 3px at 20px 30px, #fff, transparent 60%),
+    radial-gradient(2px 2px at 90px 80px, rgba(255,255,255,.9), transparent 60%),
+    radial-gradient(3px 3px at 160px 20px, rgba(255,255,255,.8), transparent 60%),
+    radial-gradient(2px 2px at 230px 120px, #fff, transparent 60%),
+    radial-gradient(3px 3px at 300px 60px, rgba(255,255,255,.85), transparent 60%);
+  background-size: 340px 160px;
+  animation: snow-a 9s linear infinite;
+}
+.hero::after {
+  background:
+    radial-gradient(2px 2px at 50px 50px, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1.5px 1.5px at 140px 130px, rgba(255,255,255,.6), transparent 60%),
+    radial-gradient(2px 2px at 250px 90px, rgba(255,255,255,.7), transparent 60%);
+  background-size: 260px 220px;
+  animation: snow-b 16s linear infinite;
+}
+@keyframes snow-a { to { background-position: 40px 160px; } }
+@keyframes snow-b { to { background-position: -30px 220px; } }
+
+.countdown { margin: 1.75rem auto 0; }
+.cd-status { margin: 0 0 .9rem; font-family: "Fraunces", Georgia, serif; font-size: 1.15rem; color: #f3e3b8; }
+.cd-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; max-width: 30rem; margin: 0 auto; }
+.cd-tile {
+  display: grid; gap: .15rem; padding: .85rem .25rem .7rem;
+  border-radius: 14px; position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 6px 18px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.25);
+  backdrop-filter: blur(2px);
+}
+.cd-tile::after { /* the "card fold" line */
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(0,0,0,.28);
+}
+.cd-num {
+  font-family: "Fraunces", Georgia, serif; font-weight: 800; line-height: 1;
+  font-size: clamp(1.9rem, 8vw, 3rem); font-variant-numeric: tabular-nums; color: #fff;
+  text-shadow: 0 0 18px rgba(200,150,46,.55);
+}
+.cd-num.tick { animation: tick .35s ease-out; }
+@keyframes tick { from { transform: translateY(-14%); opacity: .35; } to { transform: none; opacity: 1; } }
+.cd-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .18em; color: var(--gold); font-weight: 700; }
+.countdown[data-state="live"] .cd-grid, .countdown[data-state="after"] .cd-grid { display: none; }
+.countdown[data-state="live"] .cd-status, .countdown[data-state="after"] .cd-status { font-size: clamp(1.4rem, 5vw, 2rem); color: #fff; }
+
+.details { display: grid; gap: .9rem; max-width: 34rem; margin: 1.75rem auto 0; text-align: left; }
+.details div { background: rgba(255,255,255,.08); border-radius: 10px; padding: .7rem 1rem; }
+.details dt { font-size: .72rem; text-transform: uppercase; letter-spacing: .15em; color: var(--gold); font-weight: 700; }
+.details dd { margin: 0; font-size: 1.05rem; }
+.details a { color: #fff; text-underline-offset: 3px; }
+.details a:hover { color: var(--gold); }
+@media (min-width: 40rem) { .details { grid-template-columns: 1fr 1.4fr; } }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::before, .hero::after { animation: none; }
+}
+
 main { max-width: 44rem; margin: 0 auto; padding: 1.5rem 1rem 2rem; display: grid; gap: 1.5rem; }
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 2px 0 var(--line); }
 .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .75rem; }
