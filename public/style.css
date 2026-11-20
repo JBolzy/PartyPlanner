@@ -246,3 +246,9 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 
 .card-toggle:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
 #guests-body { margin-top: .9rem; padding-top: .35rem; border-top: 1px dashed var(--line); }
 @media (prefers-reduced-motion: reduce) { .chevron { transition: none; } }
+
+.notes-view { display: grid; gap: .75rem; justify-items: start; }
+.notes-text { margin: 0; padding: .7rem .9rem; background: #fff; border: 1px solid var(--line); border-radius: 10px; width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }
+.toast { position: fixed; left: 50%; bottom: 1.25rem; transform: translateX(-50%); z-index: 20; background: var(--pine, #1b4332); color: #fff; padding: .7rem 1.2rem; border-radius: 999px; font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,.25); animation: toast-in .2s ease-out; }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, .5rem); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) { .toast { animation: none; } }

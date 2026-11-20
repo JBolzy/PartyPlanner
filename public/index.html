@@ -129,10 +129,17 @@
       <section class="card" aria-labelledby="notes-h">
         <h2 id="notes-h">Dietary needs and notes</h2>
         <p class="hint">Anyone in your family with allergies or a special diet (gluten free, dairy free…)? Add it here so everyone bringing food knows.</p>
+        <div id="notes-view" class="notes-view" hidden>
+          <p id="notes-text" class="notes-text"></p>
+          <button type="button" class="ghost" id="edit-note-btn">Edit note</button>
+        </div>
         <form id="notes-form" class="form" autocomplete="off">
           <label>Your family's note <textarea name="note" rows="2" maxlength="200" placeholder="Dairy free and gluten free, nut allergy, etc."></textarea></label>
           <p class="error" role="alert"></p>
-          <div class="actions"><button type="submit" class="primary">Save note</button></div>
+          <div class="actions">
+            <button type="submit" class="primary">Save note</button>
+            <button type="button" class="ghost cancel" hidden>Cancel</button>
+          </div>
         </form>
       </section>
 
@@ -165,6 +172,8 @@
       </section>
     </div>
   </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <footer>
     Everyone can see the lists. You can only change your own RSVP and your own dishes.

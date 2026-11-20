@@ -35,3 +35,24 @@ test('saving notes keeps name/adults/kids; saving the RSVP edit keeps the note',
 test('the guest list shows each family note under their name', () => {
   assert.match(js, /p\.note \? el\('span', \{ class: 'sub note' \}/);
 });
+
+test('after saving, the note shows as read-only text with an Edit note button, not a lingering form', () => {
+  const start = at('id="notes-h"');
+  const card = html.slice(start, html.indexOf('</section>', start));
+  assert.match(card, /id="notes-view"[^>]*\bhidden\b/, 'saved view starts hidden');
+  assert.match(card, /id="notes-text"/);
+  assert.match(card, /<button[^>]*id="edit-note-btn"[^>]*>\s*Edit note/);
+  assert.match(card, /class="ghost cancel"/, 'edit mode can be cancelled');
+  assert.match(js, /notesEditing/);
+  assert.match(js, /\$\('notes-view'\)\.hidden/);
+  assert.match(js, /\$\('notes-form'\)\.hidden|forms\.notes\.hidden/);
+});
+
+test('saving a note shows a polite "Note saved" toast', () => {
+  assert.match(html, /id="toast"[^>]*role="status"[^>]*aria-live="polite"|id="toast"[^>]*aria-live="polite"[^>]*role="status"/);
+  assert.match(js, /function showToast/);
+  assert.match(js, /showToast\(.*'Note saved'/);
+  const css = fs.readFileSync(path.join(__dirname, '../public/style.css'), 'utf8');
+  assert.match(css, /\.toast\s*\{/);
+  assert.match(css, /prefers-reduced-motion[\s\S]*\.toast/);
+});

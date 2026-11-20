@@ -68,7 +68,7 @@
   const state = { person: [], food: [] };
   const editing = { person: false, foodId: null };
   // Both start collapsed: the add-a-dish form, and the "Who's coming" list (only its headcount shows).
-  const ui = { foodFormOpen: false, guestsOpen: false };
+  const ui = { foodFormOpen: false, guestsOpen: false, notesEditing: false };
 
   async function api(method, path, body) {
     const res = await fetch(`/api/${path}`, {
@@ -110,6 +110,7 @@
     else localStorage.removeItem(ME_KEY);
     editing.person = false;
     editing.foodId = null;
+    ui.notesEditing = false;
     ui.foodFormOpen = false;
     forms.food.reset();
     render();
@@ -212,7 +213,14 @@
     $('add-dish-btn').textContent = state.food.some((f) => f.personId === me) ? '+ Add another dish' : '+ Add a dish';
     $('food-form-title').textContent = editing.foodId ? 'Edit your dish' : `Add a dish for ${meGuest().name}`;
     forms.food.querySelector('.primary').textContent = editing.foodId ? 'Save changes' : 'Add dish';
-    if (document.activeElement !== forms.notes.elements.note) forms.notes.elements.note.value = meGuest().note || '';
+    // Notes card: a saved note shows as plain text with "Edit note"; the form is for first-time entry or editing.
+    const savedNote = meGuest().note || '';
+    const showNoteForm = ui.notesEditing || !savedNote;
+    $('notes-view').hidden = showNoteForm;
+    forms.notes.hidden = !showNoteForm;
+    $('notes-text').textContent = savedNote;
+    forms.notes.querySelector('.cancel').hidden = !savedNote; // nothing to go back to on a first entry
+    if (document.activeElement !== forms.notes.elements.note) forms.notes.elements.note.value = savedNote;
     renderPeople();
     renderFood();
     setGuestsOpen(ui.guestsOpen);
@@ -309,6 +317,15 @@
     }
   }
 
+  let toastTimer;
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 2500);
+  }
+
   // Run a form submit with a disabled button and an inline error message.
   function onSubmit(form, handler) {
     form.addEventListener('submit', async (e) => {
@@ -370,6 +387,18 @@
       name: mine.name, adults: mine.adults ?? mine.partySize, kids: mine.kids ?? 0, note: body.note,
     });
     state.person = state.person.map((p) => (p.id === me ? updated : p));
+    ui.notesEditing = false;
+    render();
+    showToast(updated.note ? 'Note saved' : 'Note cleared');
+  });
+  $('edit-note-btn').addEventListener('click', () => {
+    ui.notesEditing = true;
+    render();
+    forms.notes.elements.note.focus();
+  });
+  forms.notes.querySelector('.cancel').addEventListener('click', () => {
+    ui.notesEditing = false;
+    forms.notes.elements.note.value = meGuest().note || '';
     render();
   });
   forms.person.querySelector('.cancel').addEventListener('click', () => { editing.person = false; render(); });
