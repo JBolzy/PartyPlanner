@@ -117,7 +117,6 @@
           <label>Kids <input name="kids" type="number" inputmode="numeric" min="0" max="20" value="0"></label>
         </div>
         <p class="total" data-total>Total: <strong>1 person</strong></p>
-          <label>Note <span class="opt">(optional)</span> <input name="note" maxlength="200" placeholder="Allergies, arriving late, etc."></label>
           <p class="error" role="alert"></p>
           <div class="actions">
             <button type="submit" class="primary">Save changes</button>
@@ -125,6 +124,16 @@
           </div>
         </form>
         </div>
+      </section>
+
+      <section class="card" aria-labelledby="notes-h">
+        <h2 id="notes-h">Dietary needs and notes</h2>
+        <p class="hint">Anyone in your family with allergies or a special diet (gluten free, dairy free…)? Add it here so everyone bringing food knows.</p>
+        <form id="notes-form" class="form" autocomplete="off">
+          <label>Your family's note <textarea name="note" rows="2" maxlength="200" placeholder="Dairy free and gluten free, nut allergy, etc."></textarea></label>
+          <p class="error" role="alert"></p>
+          <div class="actions"><button type="submit" class="primary">Save note</button></div>
+        </form>
       </section>
 
       <section class="card" aria-labelledby="food-h">

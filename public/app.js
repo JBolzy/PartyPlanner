@@ -149,7 +149,7 @@
         el('span', { class: 'who' }, p.name),
         p.id === me ? el('span', { class: 'you' }, 'you') : '',
         ...groupPills(p).map(({ text, kind }) => el('span', { class: `badge badge-${kind}` }, text)),
-        p.note ? el('span', { class: 'sub' }, p.note) : '',
+        p.note ? el('span', { class: 'sub note' }, p.note) : '',
         dishes.length ? el('span', { class: 'sub bringing' }, `Bringing: ${dishes.join(', ')}`) : '',
       );
       list.append(el('li', {}, text, p.id === me ? actions(startEditPerson, removeMe) : ''));
@@ -212,18 +212,19 @@
     $('add-dish-btn').textContent = state.food.some((f) => f.personId === me) ? '+ Add another dish' : '+ Add a dish';
     $('food-form-title').textContent = editing.foodId ? 'Edit your dish' : `Add a dish for ${meGuest().name}`;
     forms.food.querySelector('.primary').textContent = editing.foodId ? 'Save changes' : 'Add dish';
+    if (document.activeElement !== forms.notes.elements.note) forms.notes.elements.note.value = meGuest().note || '';
     renderPeople();
     renderFood();
     setGuestsOpen(ui.guestsOpen);
     refreshAllSubmits();
   }
 
-  const forms = { rsvp: $('rsvp-form'), person: $('guest-form'), food: $('food-form') };
+  const forms = { rsvp: $('rsvp-form'), person: $('guest-form'), food: $('food-form'), notes: $('notes-form') };
   const showError = (form, msg) => { form.querySelector('.error').textContent = msg; };
 
   // Submit buttons stay disabled until the form has what it needs: every required text box has real text
   // (spaces don't count), every required choice is made, and numbers are in range.
-  const submitForms = [$('gate-form'), forms.rsvp, forms.person, forms.food];
+  const submitForms = [$('gate-form'), forms.rsvp, forms.person, forms.food, forms.notes];
   function isReady(form) {
     const textFilled = [...form.querySelectorAll('input[required]')]
       .filter((i) => i.type !== 'number')
@@ -262,7 +263,6 @@
     form.elements.adults.value = mine.adults ?? mine.partySize; // older RSVPs only have a total
     form.elements.kids.value = mine.kids ?? 0;
     syncTotal(form);
-    form.elements.note.value = mine.note || '';
     showError(form, '');
     editing.person = true;
     setGuestsOpen(true); // the edit form lives inside the collapsible part
@@ -357,9 +357,19 @@
   });
 
   onSubmit(forms.person, async (body) => {
-    const updated = await api('PUT', `person/${me}`, body);
+    const mine = meGuest();
+    const updated = await api('PUT', `person/${me}`, { ...body, note: mine.note || '' }); // the note has its own card
     state.person = state.person.map((p) => (p.id === me ? updated : p));
     editing.person = false;
+    render();
+  });
+  // Dietary needs & notes: saves only the note; the rest of the RSVP is sent back unchanged.
+  onSubmit(forms.notes, async (body) => {
+    const mine = meGuest();
+    const updated = await api('PUT', `person/${me}`, {
+      name: mine.name, adults: mine.adults ?? mine.partySize, kids: mine.kids ?? 0, note: body.note,
+    });
+    state.person = state.person.map((p) => (p.id === me ? updated : p));
     render();
   });
   forms.person.querySelector('.cancel').addEventListener('click', () => { editing.person = false; render(); });
